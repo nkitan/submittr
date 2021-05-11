@@ -1,19 +1,16 @@
 {
-  "name": "executr-api",
+  "name": "databasr-api",
   "version": "0.0.1",
-  "description": "NodeJS Executr API",
-  "main": "runner.js",
+  "description": "databasr node api",
+  "main": "database.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "node",
-    "executr",
-    "api"
-  ],
   "author": "Ankit Das",
   "license": "ISC",
   "dependencies": {
-    "express": "^4.17.1"
+    "dotenv": "^9.0.2",
+    "express": "^4.17.1",
+    "postgres": "^1.0.2"
   }
 }

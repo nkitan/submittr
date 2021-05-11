@@ -1,0 +1,9 @@
+FROM alpine:latest
+LABEL authon = "Ankit Das"
+
+RUN apk add --update nodejs npm
+RUN mkdir /loginr
+COPY package.json /loginr/package.json
+RUN npm install /loginr/
+COPY . /loginr
+CMD ["node","/loginr/api/"]  

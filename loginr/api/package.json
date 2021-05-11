@@ -1,16 +1,11 @@
 {
-  "name": "executr-api",
+  "name": "loginr-api",
   "version": "0.0.1",
-  "description": "NodeJS Executr API",
-  "main": "runner.js",
+  "description": "Login API for Submittr",
+  "main": "login.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [
-    "node",
-    "executr",
-    "api"
-  ],
   "author": "Ankit Das",
   "license": "ISC",
   "dependencies": {
