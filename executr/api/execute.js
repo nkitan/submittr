@@ -3,8 +3,15 @@ let outstruct = (errors, output) => ({
     output : output
 })
 
-let execute = function(lang, code){
-    console.log(`executing ${code.slice(0,10)}... via ${lang}`);
+let instruct = (lang, code, args, input) => ({
+    lang : lang,
+    code : code,
+    args : args,
+    input : input
+})
+
+let execute = function(program){
+    console.log(`executing ${program.code.slice(0,10)}... via ${program.lang}`);
     
     //TODO - RUN CODE HERE
 
@@ -12,4 +19,4 @@ let execute = function(lang, code){
     return output;
 }
 
-module.exports = {execute};
+module.exports = {instruct, execute};

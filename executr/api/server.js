@@ -18,6 +18,8 @@ api.post('/run',(req, res) =>{
 
     const { lang } = req.body;
     const { code } = req.body;
+    const { args } = req.body;
+    const { input } = req.body;
     const { auth_token } = req.body;
 
     if(authorizer != auth_token){
@@ -32,10 +34,11 @@ api.post('/run',(req, res) =>{
         })
     }
 
-    let executed = executr.execute(lang,code);
-    
+    let program = executr.instruct(lang,code,args,input);
+    let executed = executr.execute(program);
+
     res.status(200).send({
-        lang: `${lang}`,
+        lang: `${program.lang}`,
         errors: `${executed.errors}`,
         output: `${executed.output}`
     })
