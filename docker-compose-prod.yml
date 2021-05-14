@@ -1,0 +1,17 @@
+version: 3
+
+services:
+  databasr: 
+    build: databasr/.
+    env_file: 
+      - databasr.env
+    ports:
+      - "6971":"6971"
+
+  executr:
+    build: executr/.
+    ports:
+      - "6969":"6969"
+
+  
+

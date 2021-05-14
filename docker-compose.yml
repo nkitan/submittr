@@ -1,0 +1,16 @@
+version: "3"
+
+services:
+  databasr: 
+    build: databasr
+    ports:
+      - "6971:6971"
+    volumes:
+      - ./databasr/:/databasr
+    
+  executr:
+    build: executr
+    ports:
+      - "6969:6969"
+    volumes:
+      - ./executr/:/executr

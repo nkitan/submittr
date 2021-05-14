@@ -1,35 +1,22 @@
 const express = require('express');
+const bcrypt = require('bcrypt');
 require('dotenv').config();
 
 const api = express();
 const port = process.env.DATABASR_PORT || 6971;
-const { Pool, Client } = require('pg');
+const { Client } = require('pg');
 
-let db_user = "notrootr";
-let db_passd = "notrootrpassd";
-const db_name = "userdb";
+
+const db_name = `${process.env.DB_NAME}`;
 const db_port = process.env.DB_PORT || 6972;
-const db_host = process.env.DB_HOST || "localhost";
+const db_host = `${process.env.DB_HOST}` || "localhost";
 
-api.use(express.json());
-api.listen(
-    port,
-    () => {
-        console.log(`databasr running at http://localhost:${port}`);
-    }
-)
+let users = [{username: "Ankit", hashd: "lolwaa", token:"1", isAdmin: true, isTeacher: true}];
 
-api.post('/auth',(req,res) =>{
-    const { username } = req.body;
-    const { hashd } = req.body;
-
-    if(!username || !hashd){
-        res.status(420).send({
-            message: "invalid username / password!",
-            token: ""
-        })
-    }
-
+function updateUsers(){
+    var db_user = `${process.env.USER_LOGIN}`;
+    var db_passd = `${process.env.USER_PASSWORD}`;
+    
     const client = new Client({
         user: `${db_user}`,
         host: `${db_host}`,
@@ -37,107 +24,134 @@ api.post('/auth',(req,res) =>{
         password: `${db_passd}`,
         port: `${db_port}`
     })
-    
-    client.query('' , (err,res) => {
-        let users = res;
-        console.log(users);
-    })
 
-    users.forEach(user => {
-        if(user.name === username && user.hashd === hashd){
+    client.connect()
+    .then(() => console.log("connected! updating now"))
+    .then(() => client.query("SELECT * from users"))
+    .then(results => users = results.rows)
+    .catch(err => console.err(err))
+    .finally(() => client.end())
+}
+
+function genToken(username, password){
+    return length(username + password);
+}
+
+api.use(express.json());
+
+api.listen(
+    port,
+    () => {
+        console.log(`databasr running at http://localhost:${port}`);
+    }
+)
+
+api.post('/user/auth',async (req,res) => {
+    //updateUsers();
+    const user = users.find(user => user.username == req.body.username);
+    if(user == null){
+        res.status(420).send({
+            message: "user not found!",
+            token: "",
+            valid: false
+        })
+    } 
+
+    try {
+        if(await bcrypt.compare(req.body.password, user.password)){
             res.status(200).send({
-                message: "cool",
-                token: `${user.token}`,
-                isTeacher: `${user.isTeacher}`,
-                isAdmin: `${user.isAdmin}`,
+                message: "logged in!",
+                token: user.token,
                 valid: true
             })
-            pool.end();
         }
-    });
-    
-    pool.end();
+    } catch (error) {
+        res.status(420).send({
+            message: "user not found!",
+            token: "",
+            valid: false
+        })
+    }
 })
 
-api.post('/validate',(req,res) => {
-    const { username } = req.body;
-    const { token } = req.body;
+api.post('/user/validate',(req,res) => {
+    updateUsers();
 
-    const pool = new Pool({
-        user: `${db_user}`,
-        host: `${db_host}`,
-        database: `${db_name}`,
-        password: `${db_passd}`,
-        port: `${db_port}`
-    })
-    
-    pool.query('' , (err,res) => {
-        let users = res;
-        console.log(users);
-    })
+    const user = users.find(user => user.username == req.body.username);
+    if(user == null){
+        res.status(420).send({
+            message: "user not found!",
+            valid: false,
+            isAdmin: false,
+            isTeacher: false,
+        })
+    }
 
-    users.forEach(user => {
-        if(user.name === username && user.token === token){
-            res.status(200).send({
-                message: "cool",
-                isTeacher: `${user.isTeacher}`,
-                isAdmin: `${user.isAdmin}`,
-                valid: true
+    try {
+        if(user.token == req.body.token){
+            res.send(200).send({
+                message: "user valid",
+                valid: true,
+                isAdmin: user.isAdmin,
+                isTeacher: user.isTeacher
             })
-            pool.end();
         }
-    });
-
-    res.status(420).send({
-        message: "invalid username/password",
-        isTeacher: false,
-        isAdmin: false,
-        valid: false
-    })
-
-    pool.end();
+    } catch (error) {
+        res.status(420).send({
+            message: "user not found!",
+            valid: false,
+            isAdmin: false,
+            isTeacher: false
+        })
+    }
 })
 
-api.post('/update',(req,res) =>{
-    const { username } = req.body;
-    const { token } = req.body;
-    const { cmd } = req.body;
 
-    const pool = new Pool({
-        user: `${db_user}`,
-        host: `${db_host}`,
-        database: `${db_name}`,
-        password: `${db_passd}`,
-        port: `${db_port}`
-    })
-    
-    pool.query('' , (err,res) => {
-        let users = res;
-        console.log(users);
-    })
+api.post('/user/add',(req,res) => {
+    updateUsers();
 
-    users.forEach(user => {
-        if(user.name === username && user.token === token && user.isAdmin){
-            pool.query('' , (err,res) => {
-                console.log(err,res);
+    const user = users.find(user => user.username == req.body.username);
+    if(user == null){
+        res.send(420).send({
+            message: "user not found!",
+            valid: false
+        })
+    }
 
-                if(!err){
-                    res.status(200).send({
-                        message: "updated succesfully",
-                        valid: true
-                    })
-                }
+    try {
+        if(user.token == req.body.token){
+            if(user.isAdmin){
+                var db_user = `${process.env.ADMIN_LOGIN}`;
+                var db_passd = `${process.env.ADMIN_PASSWORD}`;
 
-                res.status(400).send({
-                    message: "not updated!",
-                    valid: true
+                const hashedPassword = await bcrypt.hash(req.body.user.password, 11);
+                var result = "";
+
+                const client = new Client({
+                    user: `${db_user}`,
+                    host: `${db_host}`,
+                    database: `${db_name}`,
+                    password: `${db_passd}`,
+                    port: `${db_port}`
                 })
-            })        
-        }
-    });
+            
+                client.connect()
+                .then(() => console.log("connected! updating now"))
+                .then(() => client.query("INSERT INTO users VALUES($1, $2, $3, $4, $5)",[req.body.user.username, hashedPassword, genToken(req.body.user.username,hashedPassword,), req.body.user.isAdmin, req.body.user.isTeacher]))
+                .then(results => result = results)
+                .catch(err = console.err(err))
+                .finally(() => client.end())
 
-    res.status(420).send({
-        message: "invalid username/password",
-        valid: false
-    })
+                res.status(200).send({
+                    message: `${result}`
+                })
+            } else {
+                throw "error";
+            }
+        }
+    } catch(error){
+        req.status(420).send({
+            message: "user not found!"
+        })
+    }
 })

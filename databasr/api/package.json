@@ -9,8 +9,9 @@
   "author": "Ankit Das",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.0.1",
     "dotenv": "^9.0.2",
     "express": "^4.17.1",
-    "postgres": "^1.0.2"
+    "pg": "^8.6.0"
   }
 }
