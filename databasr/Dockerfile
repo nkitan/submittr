@@ -1,5 +1,5 @@
-# GET BASE IMAGE 
 FROM postgres:latest
+ENV POSTGRES_PASSOWRD=toor
 
 # SET UP POSTGRESQL
 LABEL author = "Ankit Das"
@@ -16,11 +16,14 @@ RUN mkdir /databasr/
 
 # INSTALL REQUIREMENTS
 WORKDIR /databasr
-COPY ["package.json", "package-lock.json", "./"]
+COPY ["package.json", "package-lock.json", "/databasr/"]
 RUN npm install /databasr
 
 # COPY DATA FROM BASE DIRECTORY TO CONTAINER
 COPY . /databasr
 
+# EXPOSE API PORT
+EXPOSE 6971
+
 # START SERVER
-CMD ["node","/databasr/api/"]
+CMD ["node","/databasr/"]

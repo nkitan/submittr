@@ -1,0 +1,2 @@
+CREATE USER notadmin WITH NOCREATEDB NOCREATEUSER WITH PASSWORD "notadminpassword";
+GRANT SELECT ON users TO notadmin;

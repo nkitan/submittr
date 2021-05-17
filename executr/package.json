@@ -1,0 +1,30 @@
+{
+  "name": "executr-api",
+  "version": "0.0.2",
+  "description": "NodeJS Executr API",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "node",
+    "executr",
+    "api"
+  ],
+  "author": "Ankit Das",
+  "license": "ISC",
+  "dependencies": {
+    "chownr": "^2.0.0",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^9.0.2",
+    "express": "^4.17.1",
+    "is-docker": "^2.2.1",
+    "logplease": "^1.2.15",
+    "node-fetch": "^2.6.1",
+    "path": "^0.12.7",
+    "semver": "^7.3.5",
+    "uuid": "^8.3.2",
+    "waitpid": "git+https://github.com/HexF/node-waitpid.git"
+  }
+}

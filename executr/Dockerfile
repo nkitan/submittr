@@ -27,5 +27,7 @@ COPY ["package.json", "package-lock.json", "./"]
 RUN npm install
 COPY ./executr /executr
 
+EXPOSE 6969
+
 # start api
 CMD [ "node", "/executr/api/"]

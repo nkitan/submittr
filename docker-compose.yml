@@ -1,12 +1,30 @@
 version: "3"
 
 services:
+  submittr:
+    build: submittr
+    ports:
+      - "6972:6972"
+    volumes:
+      - ./submittr/serve:/var/www/
+
   databasr: 
     build: databasr
     ports:
       - "6971:6971"
+    env_file: 
+      - databasr.env
     volumes:
       - ./databasr/:/databasr
+
+  authenticatr: 
+    build: authenticatr
+    ports:
+      - "6970:6970"
+    env_file: 
+      - authenticatr.env
+    volumes:
+      - ./authenticatr/:/authenticatr
     
   executr:
     build: executr
