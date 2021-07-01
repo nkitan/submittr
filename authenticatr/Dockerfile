@@ -1,28 +1,25 @@
 # GET BASE IMAGE 
-FROM node:latest-buster-slim
+FROM node:slim
 ENV DEBIAN_FRONTEND=noninteractive
 LABEL author = "Ankit Das"
 
-ENV POSTGRES_PASSOWRD=toor
+ENV POSTGRES_PASSWORD=toor
 
 # SET UP POSTGRESQL
 RUN apt-get -y update
-RUN apt-get -y install postgres
+RUN apt-get -y install postgresql
 
 # USE SQL SCRIPTS TO SET UP TABLE
 COPY ./SQLscripts/ /docker-entrypoint-initdb.d/
 
 # INSTALL REQUIREMENTS
-RUN mkdir /authenticatr/
-WORKDIR /authenticatr
-COPY ["package.json", "package-lock.json", "/authenticatr/"]
-RUN npm install /authenticatr/
-
-# COPY DATA FROM BASE DIRECTORY TO CONTAINER
-COPY . /authenticatr
+RUN mkdir /root/authenticatr/
+WORKDIR /root/authenticatr/
+COPY ./ /root/authenticatr/
+RUN npm install /root/authenticatr/
 
 # EXPOSE API PORT
 EXPOSE 6970
 
 # START SERVER
-CMD ["node","/authenticatr/"]
+CMD ["node","/root/authenticatr/"]

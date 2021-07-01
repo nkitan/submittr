@@ -1,5 +1,10 @@
 const filesystem = require('fs');
+require('dotenv').config();
 const Logger = require('logplease')
+
+const host = process.env.EXEC_HOST || 'localhost'
+const port = process.env.EXEC_PORT || 6970
+
 
 const options = [
     {
@@ -13,7 +18,7 @@ const options = [
     {
         key: 'bindAddress',
         description: 'REST API ADDRESS',
-        default: `localhost:6969`,
+        default: `${host}:${port}`,
         validators: [],
     },
 
@@ -122,7 +127,7 @@ const options = [
     {
         key: 'repoURL',
         description: 'REPO URL FOR SYNC',
-        default: 'https://github.com/nkitan/executr/pkgs/index',
+        default: 'https://github.com/engineer-man/piston/releases/download/pkgs/index',
         validators: [],
     },
 ]

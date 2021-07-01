@@ -18,13 +18,13 @@ class Runtime {
     }
 
     static load(packageDirectory){
-        let info = JSON.parse(filesystem.readFileSync(path.join(packageDirectory, 'packageInfo.json')));
+        let info = JSON.parse(filesystem.readFileSync(path.join(packageDirectory, 'pkg-info.json')));
 
         let { language, version, buildPlatform, aliases, provides } = info;
         version = semver.parse(version);
 
         if(buildPlatform !== globals.platform){
-            logger.warn(`PACKAGE ${language}: ${version} WAS BUILT FOR PLATFORM ${buildPlatform} BUT WE HAVE ${globals.platform}`);
+            logger.warn(`package ${language}: ${version} was built for platform ${buildPlatform} but we have ${globals.platform}`);
         }
 
         if(provides){
@@ -50,7 +50,7 @@ class Runtime {
             );
         }
 
-        logger.debug(`PACKAGE ${language}: ${version} WAS LOADED`);
+        logger.info(`package ${language}: ${version} loaded`);
     }
 
     get compiled(){

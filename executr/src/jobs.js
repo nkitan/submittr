@@ -7,6 +7,7 @@ const waitPID = require('waitpid')
 
 const config = require('./config');
 const globals = require('./globals');
+const { error } = require('console');
 
 const jobStates = {
     READY: Symbol('READY TO BE PRIMED'),
@@ -47,8 +48,8 @@ class Job {
 
     async prime(){
         logger.info(`PRIMING JOB WITH UUID ${this.uuid}`);
-        logger.debug('WRITING FILES TO CACHE');
-        logger.debug(`TRANSFERING OWNERSHIP TO UID: ${this.UID} GID: ${this.GID}`);
+        logger.info('WRITING FILES TO CACHE');
+        logger.info(`TRANSFERING OWNERSHIP TO UID: ${this.UID} GID: ${this.GID}`);
 
         // set permission of directory to 700 - USER READ, WRITE, EXECUTE
         await filesystem.mkdir(this.dir, { mode: 0o700 });
@@ -65,10 +66,10 @@ class Job {
 
         this.state = jobStates.PRIMED;
 
-        logger.debug(`JOB ${this.uuid} PRIMED!`);
+        logger.info(`JOB ${this.uuid} PRIMED!`);
     }
 
-    // function to run code safelyt using prlimit
+    // function to run code safely using prlimit
     async safeCall(file, args, timeout, memoryLimit){
         return new Promise((resolve, reject) => {
             const noNetwork = config.disableNetworking ? ['nosocket'] : [];
@@ -107,10 +108,7 @@ class Job {
             proc.stdin.end();
             proc.stdin.destroy();
 
-            const killTimeout = setTimeout(
-                _ => proc.kill('SIGKILL'),
-                timeout
-            );
+            const killTimeout = setTimeout(_ => proc.kill('SIGKILL'), timeout);
 
             proc.sterr.on('data', data => {
                 if(stderr.length > config.maxOutputSize){
@@ -139,13 +137,11 @@ class Job {
 
             proc.on('exit', (code, signal) => {
                 cleanup();
-
                 resolve({error: err, stdout, stderr, output});
             })
 
-            proc.on('error', err => {
+            proc.on('error', (err) => {
                 cleanup();
-
                 reject({ error: err, stdout, stderr, output });
             });
         });
@@ -157,7 +153,7 @@ class Job {
         }
 
         logger.info(`EXECUTING JOB : ${this.uuid} WITH UID: ${this.UID} GID: ${this.GID} RUNTIME: ${this.runtime.toString()}`);
-        logger.debug('COMPILING NOW');
+        logger.info('COMPILING NOW');
 
         let compile;
 
@@ -205,16 +201,16 @@ class Job {
             for(const proc of processes){
                 try {
                     process.kill(proc.PID, 'SIGSTOP');
-                } catch {
-
+                } catch(err) {
+                    logger.error('could not stop process: ' + err)
                 }
             }
 
             for (const proc of processes){
                 try {
                     process.kill(proc.PID, 'SIGKILL');
-                } catch {
-
+                } catch(err) {
+                    logger.error('could not kill process: ' + err)
                 }
 
                 waitPID(proc.PID);

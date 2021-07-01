@@ -1,16 +1,17 @@
 const Pool = require("pg").Pool;
 
-const db_user = process.env.DB_USER || "notadmin";
-const db_password = process.env.DB_PASSWORD || "notadminpassword";
+const db_password = process.env.DB_PASSWORD || "sarik";
 const db_host = process.env.DB_HOST || "localhost";
 const db_port = process.env.DB_PORT || 5432;
-const db_name = process.env.DB_NAME || "user";
-const db_admin = process.env.DB_ADMIN || "root";
-const db_adminpassword = process.env.DB_ADMINPASSWORD || "toor";
+const db_name = process.env.DB_NAME || "jwt";
+const db_admin = process.env.DB_ADMIN || "admin";
+const db_user = process.env.DB_USER || "useracc";
+const db_adminpassword = process.env.DB_ADMINPASSWORD || "adminpassword";
+const db_userpassword = process.env.DB_USERPASSWORD || "userpassword";
 
 const userpool = new Pool({
      user: `${db_user}`,
-     password: `${db_password}`,
+     password: `${db_userpassword}`,
      host: `${db_host}`,
      port: `${db_port}`,
      database: `${db_name}`,

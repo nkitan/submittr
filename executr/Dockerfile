@@ -1,4 +1,4 @@
-FROM node:latest-buster-slim
+FROM node:slim
 ENV DEBIAN_FRONTEND=noninteractive
 RUN dpkg-reconfigure -p critical dash
 
@@ -22,12 +22,12 @@ RUN apt-get -y update && \
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 
 # import files from base
-WORKDIR /executr
-COPY ["package.json", "package-lock.json", "./"]
+WORKDIR /root/executr
+COPY ["package.json", "package-lock.json", "/root/executr"]
 RUN npm install
-COPY ./executr /executr
+COPY ./executr /root/executr
 
 EXPOSE 6969
 
 # start api
-CMD [ "node", "/executr/api/"]
+CMD [ "node", "/root/executr/api/"]

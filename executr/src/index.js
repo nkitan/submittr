@@ -19,13 +19,13 @@ const app = express();
     logger.info("LOG LEVEL SET TO ", config.logLevel);
     logger.info("CHECKING DIRECTORIES");
 
-    logger.debug("ENSURING DATA DIRECTORIES EXIST");
+    logger.info("ENSURING DATA DIRECTORIES EXIST");
 
     // check if all data subdirectories exist, if not, create new
     Object.values(globals.dataDirectories).forEach(subdirectory => {
         let dataPath = path.join(config.dataDirectory,subdirectory);
 
-        logger.debug(`ENSURING ${dataPath} exists`)
+        logger.info(`ENSURING ${dataPath} exists`)
 
         if(!filesystem.existsSync(dataPath)){
             logger.info(`${dataPath} DOES NOT EXIST. CREATING NEW`);
@@ -58,8 +58,8 @@ const app = express();
     installedLanguages.forEach(package => runtime.load(package));
 
     logger.info('STARTING API SERVER');
-    logger.debug('STARTING EXPRESS APP');
-    logger.debug('REGISTERING MIDDLEWARE');
+    logger.info('STARTING EXPRESS APP');
+    logger.info('REGISTERING MIDDLEWARE');
 
     app.use(express.urlencoded({extended: true}));
     app.use(express.json())
@@ -70,23 +70,23 @@ const app = express();
         });
     });
 
-    logger.debug('REGISTERING ROUTES');
+    logger.info('REGISTERING ROUTES');
 
-    app.use('/api',api);
+    app.use('/exec',api);
 
     // handle invalid page redirects
     app.use((req, res, next) => {
-        return res.status(404).send({
+        return res.status(404).json({
             message: "not found!"
         });
     });
 
-    logger.debug('CALLING APP LISTENER');
+    logger.info('CALLING APP LISTENER');
 
     // get address and port from config and start listening
     const [ address, port ] = config.bindAddress.split(':');
 
     app.listen(port, address, () => {
-        logger.info('executr running @ ', config.bindAddress);
+        logger.info('executr running @', config.bindAddress);
     });
 })(); // run index asynchronously

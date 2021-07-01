@@ -187,7 +187,7 @@ router.post('/packages', async (req, res) => {
     }
 });
  
-router.delete('./packages', async (req, res) => {
+router.delete('/packages', async (req, res) => {
     logger.debug('REQUEST TO UNINSTALL PACKAGE RECEIVED');
 
     const { language, version } = req.body;

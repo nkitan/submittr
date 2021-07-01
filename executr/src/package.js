@@ -4,8 +4,6 @@ const filesystem = require('fs');
 const fspromises = require('fs/promises');
 const fetch = require('node-fetch');
 const crypto = require('crypto');
-const chownr = require('chownr');
-const util = require('util');
 const childprocess = require('child_process');
 const path = require('path');
 
@@ -22,30 +20,31 @@ class Package {
     }
 
     get installed(){
-        return filesystem.existsSync(path.join(this._installPath, globals.installedPackages));
+        return filesystem.existsSync(path.join(this.installPath, globals.installedPackages));
     }
 
     get installPath(){
-        return path.join(config.dataDirectory, globals.dataDirectories.packages,this.language, this.version.raw);
+        return path.join(config.dataDirectory, globals.dataDirectories.packages, this.language, this.version.raw);
     }
 
-    async install(){
-        if(this.installed){
-            throw new Error('ALREADY INSTALLED');
+    async install(force){
+        if(this.installed && !force){
+            runtime.load(this.installPath);
+            throw new Error('already installed');
         }
 
-        logger.info(`INSTALLING ${this.language}: ${this.version.raw}`);
+        logger.info(`installing ${this.language}: ${this.version.raw}`);
 
+        // check if path exists
         if(filesystem.existsSync(this.installPath)){
-            logger.warn(`${this.language}: ${this.version.raw} HAS RESIDUAL FILES LEFT OVER`);
-
+            logger.warn(`${this.language}: ${this.version.raw} has residual files`);
             await fspromises.rm(this.installPath, {recursive: true, force: true});
         }
 
-        logger.debug(`MAKING DIRECTORY ${this.installPath}`);
+        logger.info(`creating directory ${this.installPath}`);
         await fspromises.mkdir(this.installPath, {recursive: true });
 
-        logger.debug(`DOWNLOADING PACKAGE FROM ${this.download} TO ${this.installPath}`);
+        logger.info(`downloading package from ${this.download} into ${this.installPath}`);
 
         // download package into fileStream at pkgpath
         const pkgpath = path.join(this.installPath, 'pkg.tar.gz');
@@ -59,22 +58,22 @@ class Package {
             fileStream.on('finish', resolve);
         });
 
-        logger.debug('VALIDATING CHECKSUM');
-        logger.debug(`SHA256(pkg.tar.gz = ${this.checksum}`);
-
+        logger.info('validating checksum');
         const checksum = crypto.createHash('sha256')
             .update(filesystem.readFileSync(pkgpath))
             .digest('hex');
 
+        logger.info(`sha256(${this.language} : ${this.checksum}`);    
+        logger.info(`sha256(pkg.tar.gz : ${checksum}`);
         if(checksum !== this.checksum){
-            throw new Error(`CHECKSUM CHECK FAILED ${this.checksum} != ${checksum}`);
+            throw new Error(`checksum error: ${this.checksum} != ${checksum}`);
         }    
 
-        logger.debug(`EXTRACTING PACKAGE FROM ${pkgpath} TO ${this.installPath}`);
+        logger.info(`extracting from ${pkgpath} to ${this.installPath}`);
         
         // extract gz
         await new Promise((resolve, reject) => {
-            const proc = childprocess.exec(`bash -c 'cd "${this.installPath}" && tar xzf ${pkgpath}`);
+            const proc = childprocess.exec(`bash -c 'cd "${this.installPath}" && tar xzf pkg.tar.gz'`);
             
             proc.once('exit', (code, _) => {
                 code === 0 ? resolve() : reject();
@@ -86,17 +85,17 @@ class Package {
             proc.once('error', reject);
         });
 
-        logger.debug('REGISTERING RUNTIME');
+        logger.info('registering runtime');
         runtime.load(this.installPath);
 
-        logger.debug('CACHING');
-        const getEnv = `cd ${this.installPath}; source environment; env`;
+        logger.info('caching environment');
+        const getEnv = `cd ${this.installPath}; source environment; env`
         const envOut = await new Promise((resolve, reject) => {
             let stdout = '';
 
             const proc = childprocess.spawn(
                 'env',
-                ['-i', 'bash', '-c', `${getEnv}`],
+                ['-i', 'bash', '-c', getEnv],
                 {
                     stdio: ['ignore', 'pipe', 'pipe'],
                 }
@@ -121,9 +120,10 @@ class Package {
 
         await fspromises.writeFile(path.join(this.installPath, '.env'), filteredEnv);
         
-        logger.debug('WRITING INSTALLED STATE TO DISK');
+        logger.info('writing installed state to disk');
         await fspromises.writeFile(path.join(this.installPath, globals.installedPackages),Date.now().toString());
-                
+        
+        logger.info(`installed package ${this.language}: ${this.version.raw}`)
         return {
             language: this.language,
             version: this.version.raw,
@@ -131,24 +131,23 @@ class Package {
     }       
 
     async uninstall(){
-        logger.info(`UNINSTALLING ${this.language}: ${this.version.raw}`);
-        logger.debug('FINDING RUNTIME');
+        logger.info(`uninstalling ${this.language}: ${this.version.raw}`);
+        logger.info('finding runtime');
 
         const found = runtime.getRuntimeByNameAndVersion(this.language,this.version.raw);
 
         if(!found){
-            logger.error(`UININSTALL FAILED! NOT INSTALLED`);
-            
-            throw new Error(`${this.language}: ${this.version.raw} IS NOT INSTALLED`);
+            logger.error(`uninstall failed! package not installed`);
+            throw new Error(`${this.language}: ${this.version.raw} is not installed`);
         }
 
-        logger.debug('UNREGISTERING RUNTIME');
+        logger.info('unregistering runtime');
         found.unregister();
 
-        logger.debug('CLEANING FILES FROM DISK');
+        logger.info('cleaning files from disk');
         await fspromises.rmdir(this.installPath, { recursive: true });
 
-        logger.info(`UNINSTALLED ${this.language}: ${this.version.raw}`);
+        logger.info(`succesfully uninstalled ${this.language}: ${this.version.raw}`);
 
         return {
             language: this.language,

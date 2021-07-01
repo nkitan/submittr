@@ -1,5 +1,4 @@
 const logger = require('logplease').create('api');
-const axios = require('axios');
 const express = require('express');
 const router = express.Router();
 
@@ -7,7 +6,7 @@ const config = require('../src/config');
 const runtime = require('../src/runtime');
 const Job = require('../src/jobs');
 const package = require('../src/package');
-const verify = require('../src/verify.js')
+const verify = require('../src/verify')
 
 router.use((req, res, next) => {
     if(['GET', 'HEAD', 'OPTIONS'].includes(req.method)){
@@ -15,7 +14,7 @@ router.use((req, res, next) => {
     }
 
     if(!req.headers['content-type'].startsWith('application/json')) {
-        return res.status(415).send({
+        return res.status(405).json({
             message: 'invalid request type',
         });
     }
@@ -23,124 +22,115 @@ router.use((req, res, next) => {
     next();
 })
 
+//TODO - rt undefined when trying to execute
 router.post('/execute', verify, async (req, res) => {
-    logger.info('REQUEST TO EXECUTE RECEIVED');
+    logger.info('request to execute recieved');
     try{
         const {
-            language,
-            version,
-            files,
-            stdin,
-            args,
-            runTimeout,
-            compileTimeout,
-            compileMemoryLimit,
-            runtimeMemoryLimit,
-        } = req.body;
-    } catch(error){
-        return res.status(420).send({
-            message: 'invalid partameters',
-        })
-    }
-    
-    if(!username || typeof username !== 'string'){
-        return res.status(420).send({
-            message: 'username must be provided as a string'
-        })
-    }
-
-    if(!token || typeof token !== 'string'){
-        return res.status(420).send({
-            message: 'token must be provided as a string'
-        })
-    }
-
-    if(!language || typeof language !== 'string'){
-        return res.status(420).send({
-            message: 'language is required to be a string',
-        });
-    }
-
-    if (!version || typeof version !== 'string') {
-        return res.status(420).send({
-            message: 'version is required to be a string',
-        });
-    }
-
-    if (!files || !Array.isArray(files)) {
-        return res.status(420).send({
-            message: 'files is required to be an array',
-        });
-    }
-
-    for (const [i, file] of files.entries()) {
-        if (typeof file.content !== 'string') {
-            return res.status(420).send({
-                message: `file[${i}]: content is required as a string`,
-            });
-        }
-    }
-
-    if(compileMemoryLimit){
-        if(typeof compileMemoryLimit !== 'number'){
-            return res.status(410).send({
-                message: 'compiled memory limit must be a number',
-            });
-        }
-
-        if(config.compileMemoryLimit >= 0 && (compileMemoryLimit > config.compileMemoryLimit || compileMemoryLimit < 0)){
-            return res.status(410).send({
-                message: 'compile memory limit cannot be greater than configured limit of ' + config.compileMemoryLimit,
-            });
-        }
-    }
-
-    if(runtimeMemoryLimit){
-        if(typeof runtimeMemoryLimit !== 'number'){
-            return res.status(410).send({
-                message: 'run memory limit must be a number',
-            });
-        }
-
-        if(config.runtimeMemoryLimit >= 0 && (runtimeMemoryLimit > config.runtimeMemoryLimit || runtimeMemoryLimit < 0)){
-            return res.status(410).send({
-                message: 'run memory limit cannot be greater than configured limit of ' + config.runtimeMemoryLimit,
-            });
-        }
-    }
-    
-    const runTime = runtime.getLatestRuntimeMatchingLanguageVersion(language,version);
-
-    if(runTime === undefined){
-        return res.status(400).send({
-            message: `${language}: ${version} RUNTIME IS UNSUPPORTED`,
-        })
-    } 
-
-    const job = new Job({
-        runtime: runTime,
-        alias: language,
-        files: files,
-        args: args || [],
-        stdin: stdin || '',
+                language,
+                version,
+                files,
+                stdin,
+                args,
+                runTimeout,
+                compileTimeout,
+                compileMemoryLimit,
+                runtimeMemoryLimit,
+            } = req.body;
         
-        timeouts: {
-            run: runTimeout || 3000,
-            compile: compileTimeout || 10000,
-        },
+        if(!language || typeof language !== 'string'){
+            return res.status(400).json({
+                message: 'language is required to be a string',
+            });
+        }
 
-        memoryLimits: {
-            run: runtimeMemoryLimit || config.runtimeMemoryLimit,
-            compile: compileMemoryLimit || config.compileMemoryLimit,
-        },
-    });
+        if (!version || typeof version !== 'string') {
+            return res.status(400).json({
+                message: 'version is required to be a string',
+            });
+        }
 
-    await job.prime();
-    const result = await job.execute();
+        if (!files || !Array.isArray(files)) {
+            return res.status(400).json({
+                message: 'files is required to be an array',
+            });
+        }
+
+        for (const [i, file] of files.entries()) {
+            if (typeof file.content !== 'string') {
+                return res.status(400).json({
+                    message: `file[${i}]: content is required as a string`,
+                });
+            }
+        }
+
+        if(compileMemoryLimit){
+            if(typeof compileMemoryLimit !== 'number'){
+                return res.status(410).json({
+                    message: 'compiled memory limit must be a number',
+                });
+            }
+
+            if(config.compileMemoryLimit >= 0 && (compileMemoryLimit > config.compileMemoryLimit || compileMemoryLimit < 0)){
+                return res.status(410).json({
+                    message: 'compile memory limit cannot be greater than configured limit of ' + config.compileMemoryLimit,
+                });
+            }
+        }
+
+        if(runtimeMemoryLimit){
+            if(typeof runtimeMemoryLimit !== 'number'){
+                return res.status(410).json({
+                    message: 'run memory limit must be a number',
+                });
+            }
+
+            if(config.runtimeMemoryLimit >= 0 && (runtimeMemoryLimit > config.runtimeMemoryLimit || runtimeMemoryLimit < 0)){
+                return res.status(410).json({
+                    message: 'run memory limit cannot be greater than configured limit of ' + config.runtimeMemoryLimit,
+                });
+            }
+        }
+
+        const runTime = runtime.getLatestRuntimeMatchingLanguageVersion(language, version);
+        logger.info('RUNTIME')
+        if(runTime === undefined){
+            return res.status(400).json({
+                message: `${language}: ${version} runtime unsupported`,
+            })
+        } 
+        
+        const job = new Job({
+            runtime: runTime,
+            alias: language,
+            files: files,
+            args: args || [],
+            stdin: stdin || '',
+            
+            timeouts: {
+                run: runTimeout || 3000,
+                compile: compileTimeout || 10000,
+            },
     
-    await job.cleanup();
+            memoryLimits: {
+                run: runtimeMemoryLimit || config.runtimeMemoryLimit,
+                compile: compileMemoryLimit || config.compileMemoryLimit,
+            },
+        });
+        logger.info('JOBTIME')
+        await job.prime();
+        const result = await job.execute();
 
-    return res.status(200).send(result);
+        logger.info('CLEANTIME')
+        await job.cleanup();
+        return res.status(200).json(result);
+
+    } catch(error){
+        logger.info(error)
+        return res.status(400).json({
+            message: 'invalid parameters'
+        })
+    }
 })
 
 router.get('/runtimes', verify, (req, res) => {
@@ -153,11 +143,11 @@ router.get('/runtimes', verify, (req, res) => {
         };
     });
 
-    return res.status(200).send(runtimes);
+    return res.status(200).json(runtimes);
 })
 
 router.get('/packages', verify, async (req, res) => {
-    logger.debug('REQUEST TO LIST PACKAGES RECEIVED');
+    logger.info('request to list packages recieved');
     let packages = await package.getPackageList();
 
     packages = packages.map(package => {
@@ -168,52 +158,53 @@ router.get('/packages', verify, async (req, res) => {
         };
     });
 
-    return res.status(200).send(packages);
+    return res.status(200).json(packages);
 });
 
 router.post('/packages', verify, async (req, res) => {
-    logger.debug('REQUEST TO INSTALL PACKAGE RECEIVED');
-
-    const { language, version } = req.body;
+    const { language, version, force } = req.body;
     const Package = await package.getPackage(language, version);
 
+    logger.info('request to install package ' + language + ':' + version + ' recieved');
+
     if(Package == null){
-        return res.status(404).send({
-            message: `PACKAGE ${language}: ${version} NOT FOUND!`,
+        logger.error(`package ${language}: ${version} not found!`)
+        return res.status(404).json({
+            message: `package ${language}: ${version} not found!`,
         });
     }
 
     try {
-        const response = await Package.install();
-        return res.status(200).send(response);
+        const response = await Package.install(force);
+        return res.status(200).json(response);
     } catch (error){
-        logger.error(`ERROR WHILE INSTALLING ${Package.language}: ${Package.version}: ${error.message}`)
+        logger.error(`error while installing ${Package.language}: ${Package.version}: ${error.message}`)
         
-        return res.status(500).send({
+        return res.status(500).json({
             message: error.message,
         })
     }
 });
  
 router.delete('/packages', verify, async (req, res) => {
-    logger.debug('REQUEST TO UNINSTALL PACKAGE RECEIVED');
+    logger.info(`request to uninstall ${language}: ${version} recieved`);
 
     const { language, version } = req.body;
     const Package = await package.getPackage(language, version);
 
     if(Package == null){
-        return res.status(400).send({
-            message: `PACKAGE ${language}: ${version} IS NOT INSTALLED`,
+        return res.status(410).json({
+            message: `package ${language}: ${version} is not installed`,
         });
     }
 
     try {
         const response = await Package.uninstall();
-        return res.status(200).send(response);
+        return res.status(200).json(response);
     } catch(error){
-        logger.error(`ERROR WHILE UNINSTALLING PACKAGE ${language}: ${version} : ${error.message}`);
+        logger.error(`error while uninstalling package ${language}: ${version} : ${error.message}`);
 
-        return res.status(500).send({
+        return res.status(500).json({
             message: error.message,
         });
     }
