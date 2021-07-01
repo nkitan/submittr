@@ -22,12 +22,8 @@ RUN apt-get -y update && \
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 
 # import files from base
-WORKDIR /root/executr
-COPY ["package.json", "package-lock.json", "/root/executr"]
+WORKDIR /root/executr/
+COPY . /root/executr/
 RUN npm install
-COPY ./executr /root/executr
 
-EXPOSE 6969
-
-# start api
-CMD [ "node", "/root/executr/api/"]
+EXPOSE 6970

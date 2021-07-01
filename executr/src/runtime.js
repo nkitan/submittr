@@ -6,7 +6,7 @@ const path = require('path');
 const globals = require('./globals');
 const config = require('./config');
 
-const runtimes = [];
+const runtimesArray = [];
 
 class Runtime {
     constructor({ language, version, aliases, pkgdir, runtime }) {
@@ -29,7 +29,7 @@ class Runtime {
 
         if(provides){
             provides.forEach(language => {
-                runtimes.push(
+                runtimesArray.push(
                     new Runtime({
                         language: language.language,
                         aliases: language.aliases,
@@ -40,7 +40,7 @@ class Runtime {
                 );
             });
         } else {
-            runtimes.push(
+            runtimesArray.push(
                 new Runtime({
                     language,
                     version,
@@ -53,7 +53,7 @@ class Runtime {
         logger.info(`package ${language}: ${version} loaded`);
     }
 
-    get compiled(){
+    get compiled(){T
         if(this._compiled === undefined){
             this._compiled == filesystem.existsSync(path.join(this.pkgdir,'compile'));
         }
@@ -82,17 +82,17 @@ class Runtime {
     }
 
     unregister() {
-        const index = runtimes.indexOf(this);
-        runtimes.splice(index,1);
+        const index = runtimesArray.indexOf(this);
+        runtimesArray.splice(index,1);
     }
 }
 
-module.exports = runtimes;
+module.exports = runtimesArray;
 module.exports.Runtime = Runtime;
 
 module.exports.getRuntimesMatchingLanguageVersion = function (language, version){
-    return runtimes.filter( runtime => (runtime.language || runtime.aliases.includes(language)) && 
-        semver.satisfies(rt.version, version)
+    return runtimesArray.filter( runtime => (runtime.language == language || runtime.aliases.includes(language)) && 
+        semver.satisfies(runtime.version, version)
     );
 };
 
@@ -102,7 +102,7 @@ module.exports.getLatestRuntimeMatchingLanguageVersion = function (language, ver
 };
 
 module.exports.getRuntimeByNameAndVersion = function (runtime, version) {
-    return runtimes.find(runTime => (runTime.runtime === runtime || (runTime.runtime === undefined && runTime.language == runtime)) &&
+    return runtimesArray.find(runTime => (runTime.runtime === runtime || (runTime.runtime === undefined && runTime.language == runtime)) &&
         semver.satisfies(runTime.version, version)
     );
 };

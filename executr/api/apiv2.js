@@ -93,7 +93,7 @@ router.post('/execute', verify, async (req, res) => {
         }
 
         const runTime = runtime.getLatestRuntimeMatchingLanguageVersion(language, version);
-        logger.info('RUNTIME')
+        
         if(runTime === undefined){
             return res.status(400).json({
                 message: `${language}: ${version} runtime unsupported`,
@@ -117,11 +117,9 @@ router.post('/execute', verify, async (req, res) => {
                 compile: compileMemoryLimit || config.compileMemoryLimit,
             },
         });
-        logger.info('JOBTIME')
+        
         await job.prime();
         const result = await job.execute();
-
-        logger.info('CLEANTIME')
         await job.cleanup();
         return res.status(200).json(result);
 

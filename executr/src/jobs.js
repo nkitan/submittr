@@ -47,26 +47,25 @@ class Job {
     }
 
     async prime(){
-        logger.info(`PRIMING JOB WITH UUID ${this.uuid}`);
-        logger.info('WRITING FILES TO CACHE');
-        logger.info(`TRANSFERING OWNERSHIP TO UID: ${this.UID} GID: ${this.GID}`);
+        logger.info(`priming job ${this.uuid}`);
+        logger.info('writing cache');
+        logger.info(`transferring ownership from uid: ${this.UID} gid: ${this.GID}`);
 
         // set permission of directory to 700 - USER READ, WRITE, EXECUTE
-        await filesystem.mkdir(this.dir, { mode: 0o700 });
+        await filesystem.mkdir(this.directory, { mode: 0o700 });
 
         // change UID and GID of the working directory
-        await filesystem.chown(this.dir, this.UID, this.GID);
+        await filesystem.chown(this.directory, this.UID, this.GID);
 
         for (const file of this.files){
-            let filePath = path.join(this.dir, file.name);
+            let filePath = path.join(this.directory, file.name);
 
             await filesystem.writeFile(filePath, file.content);
             await filesystem.chown(filePath, this.UID, this.GID);
         }
 
         this.state = jobStates.PRIMED;
-
-        logger.info(`JOB ${this.uuid} PRIMED!`);
+        logger.info(`job ${this.uuid} primed`);
     }
 
     // function to run code safely using prlimit
@@ -149,11 +148,11 @@ class Job {
 
     async execute(){
         if(this.state !== jobStates.PRIMED) {
-            throw new Error('JOB MUST BE PRIMED BEFORE STARTING, CURRENT STATE IS' + this.state.toString());
+            throw new Error('job must be primed before execution, current state is ' + this.state.toString());
         }
 
-        logger.info(`EXECUTING JOB : ${this.uuid} WITH UID: ${this.UID} GID: ${this.GID} RUNTIME: ${this.runtime.toString()}`);
-        logger.info('COMPILING NOW');
+        logger.info(`executing job : ${this.uuid} uid: ${this.UID} gid: ${this.GID} on runtime: ${this.runtime.toString()}`);
+        logger.info('compiling');
 
         let compile;
 
@@ -235,7 +234,7 @@ class Job {
                         });
                     } 
                     } catch (error) {
-                        logger.warn(`ERROR REMOVING FILE ${filePath}: ${error}`);
+                        logger.warn(`error removing file ${filePath}: ${error}`);
                 }
             }
         }
@@ -244,7 +243,7 @@ class Job {
     }
 
     async cleanup(){
-        logger.info(`CLEANING UP JOB: ${this.uuid}`);
+        logger.info(`cleaning job ${this.uuid}`);
 
         await Promise.all([
             this.cleanupProcesses(),
