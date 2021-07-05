@@ -3,14 +3,11 @@ const {v4: uuidv4 } = require('uuid');
 const childprocess = require('child_process');
 const path = require('path');
 const filesystem = require('fs/promises');
-const fs = require('fs');
-const waitPID = require('waitpid');
-
+const waitPID = require('waitpid')
 
 const config = require('./config');
 const globals = require('./globals');
 const { error } = require('console');
-const { resolve } = require('url');
 
 const jobStates = {
     READY: Symbol('READY TO BE PRIMED'),
@@ -50,32 +47,6 @@ class Job {
     }
 
     async prime(){
-        const downloadFile = async function(url, filePath) {
-            return new Promise((resolve, reject) => {
-                const fileStream = fs.createWriteStream(filePath);
-                const curl = childprocess.spawn('curl', [url]);
-
-                curl.stdout.on('data', (data) => { 
-                    fileStream.write(data); 
-                });
-
-                curl.stdout.on('end', (data) =>  {
-                    fileStream.end();
-                    logger.info('downloaded ' + filePath);
-                    resolve()
-                });
-    
-                curl.on('exit', (code) =>  {
-                    if (code != 0) {
-                        logger.error('download failed -' + code);
-                        reject();
-                    }
-                
-                    resolve()
-                });
-            })
-        };
-
         logger.info(`priming job ${this.uuid}`);
         // set permission of directory to 700 - USER READ, WRITE, EXECUTE
         await filesystem.mkdir(this.directory, { mode: 0o700 });
@@ -86,10 +57,11 @@ class Job {
         
         for (const file of this.files){
             let filePath = path.join(this.directory, file.name);
-                await downloadFile(file.content, filePath)
-                await filesystem.chown(filePath, this.UID, this.GID);
-            }
-        
+
+            await filesystem.writeFile(filePath, file.content);
+            await filesystem.chown(filePath, this.UID, this.GID);
+        }
+
         this.state = jobStates.PRIMED;
         logger.info(`job ${this.uuid} primed`);
     }

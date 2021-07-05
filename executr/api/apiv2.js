@@ -1,6 +1,7 @@
 const logger = require('logplease').create('api');
 const express = require('express');
 const router = express.Router();
+const URL = require('url').URL;
 
 const config = require('../src/config');
 const runtime = require('../src/runtime');
@@ -9,6 +10,7 @@ const package = require('../src/package');
 
 const verifyAdmin = require('../src/verifyAdmin')
 const verifyTeacher = require('../src/verifyTeacher')
+
 
 router.use((req, res, next) => {
     if(['GET', 'HEAD', 'OPTIONS'].includes(req.method)){
@@ -40,6 +42,15 @@ router.post('/execute', verifyTeacher, async (req, res) => {
                 runtimeMemoryLimit,
             } = req.body;
         
+        const isValidURL = (s) => {
+            try {
+              new URL(s);
+              return true;
+            } catch (err) {
+              return false;
+            }
+        };
+
         if(!language || typeof language !== 'string'){
             return res.status(400).json({
                 message: 'language is required to be a string',
@@ -62,6 +73,12 @@ router.post('/execute', verifyTeacher, async (req, res) => {
             if (typeof file.content !== 'string') {
                 return res.status(400).json({
                     message: `file[${i}]: content is required as a string`,
+                });
+            }
+
+            if (!isValidURL(file.content)){
+                return res.status(400).json({
+                    message: `file[${i}]: content must be a valid URL`,
                 });
             }
         }
