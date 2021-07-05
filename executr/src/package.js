@@ -6,10 +6,13 @@ const fetch = require('node-fetch');
 const crypto = require('crypto');
 const childprocess = require('child_process');
 const path = require('path');
+const chownr = require('chownr');
+const util = require('util');
 
 const runtime = require('./runtime');
 const config = require('./config');
 const globals = require('./globals');
+const { stdout } = require('process');
 
 class Package {
     constructor({ language, version, download, checksum }){
@@ -29,6 +32,7 @@ class Package {
 
     async install(force){
         if(this.installed && !force){
+            logger.info('registering runtime at ' + this.installPath);
             runtime.load(this.installPath);
             throw new Error('already installed');
         }
@@ -85,7 +89,8 @@ class Package {
             proc.once('error', reject);
         });
 
-        logger.info('registering runtime');
+
+        logger.info('registering runtime at ' + this.installPath);
         runtime.load(this.installPath);
 
         logger.info('caching environment');
@@ -95,7 +100,7 @@ class Package {
 
             const proc = childprocess.spawn(
                 'env',
-                ['-i', 'bash', '-c', getEnv],
+                ['-i', 'bash', '-c', `${getEnv}`],
                 {
                     stdio: ['ignore', 'pipe', 'pipe'],
                 }
@@ -117,12 +122,19 @@ class Package {
                 line.split('=', 2)[0]
             )
         ).join('\n');
-
+        
+        
         await fspromises.writeFile(path.join(this.installPath, '.env'), filteredEnv);
         
-        logger.info('writing installed state to disk');
-        await fspromises.writeFile(path.join(this.installPath, globals.installedPackages),Date.now().toString());
+        logger.info('changing ownership of package path');
+        await util.promisify(chownr)(this.installPath, 0, 0);
+ 
+        logger.info('deleting residual file ' + pkgpath)
+        await fspromises.rm(pkgpath);
         
+        logger.debug('writing installed state to disk');
+        await fspromises.writeFile(path.join(this.installPath, globals.installedPackages),Date.now().toString());
+
         logger.info(`installed package ${this.language}: ${this.version.raw}`)
         return {
             language: this.language,

@@ -15,6 +15,6 @@ module.exports = {
 
     version: require('../package.json').version,
     platform,
-    installedPackages: '.langman-installed',
+    installedPackages: '.installed',
     cleanupDirectories: ['/dev/shm' , '/run/lock', '/tmp', '/var/tmp'],
 };

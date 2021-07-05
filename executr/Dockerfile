@@ -1,5 +1,4 @@
 FROM node:slim
-ENV DEBIAN_FRONTEND=noninteractive
 RUN dpkg-reconfigure -p critical dash
 
 # create runner users
@@ -21,6 +20,8 @@ RUN apt-get -y update && \
 # set locale to en_US
 RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen
 
+#install nosocket
+RUN make -C ./src/nosocket/ all && make -C ./src/nosocket/ install
 # import files from base
 WORKDIR /root/executr/
 COPY . /root/executr/

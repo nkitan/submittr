@@ -6,7 +6,9 @@ const config = require('../src/config');
 const runtime = require('../src/runtime');
 const Job = require('../src/jobs');
 const package = require('../src/package');
-const verify = require('../src/verify')
+
+const verifyAdmin = require('../src/verifyAdmin')
+const verifyTeacher = require('../src/verifyTeacher')
 
 router.use((req, res, next) => {
     if(['GET', 'HEAD', 'OPTIONS'].includes(req.method)){
@@ -22,8 +24,8 @@ router.use((req, res, next) => {
     next();
 })
 
-//TODO - rt undefined when trying to execute
-router.post('/execute', verify, async (req, res) => {
+//TODO - script to make nosocket available always
+router.post('/execute', verifyTeacher, async (req, res) => {
     logger.info('request to execute recieved');
     try{
         const {
@@ -131,7 +133,7 @@ router.post('/execute', verify, async (req, res) => {
     }
 })
 
-router.get('/runtimes', verify, (req, res) => {
+router.get('/runtimes', verifyTeacher, (req, res) => {
     const runtimes = runtime.map(runTime => {
         return {
             language: runTime.language,
@@ -144,7 +146,7 @@ router.get('/runtimes', verify, (req, res) => {
     return res.status(200).json(runtimes);
 })
 
-router.get('/packages', verify, async (req, res) => {
+router.get('/packages', verifyAdmin, async (req, res) => {
     logger.info('request to list packages recieved');
     let packages = await package.getPackageList();
 
@@ -159,7 +161,7 @@ router.get('/packages', verify, async (req, res) => {
     return res.status(200).json(packages);
 });
 
-router.post('/packages', verify, async (req, res) => {
+router.post('/packages', verifyAdmin, verifyTeacher, async (req, res) => {
     const { language, version, force } = req.body;
     const Package = await package.getPackage(language, version);
 
@@ -184,7 +186,7 @@ router.post('/packages', verify, async (req, res) => {
     }
 });
  
-router.delete('/packages', verify, async (req, res) => {
+router.delete('/packages', verifyAdmin, verifyTeacher, async (req, res) => {
     logger.info(`request to uninstall ${language}: ${version} recieved`);
 
     const { language, version } = req.body;

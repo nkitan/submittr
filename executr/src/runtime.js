@@ -19,7 +19,6 @@ class Runtime {
 
     static load(packageDirectory){
         let info = JSON.parse(filesystem.readFileSync(path.join(packageDirectory, 'pkg-info.json')));
-
         let { language, version, buildPlatform, aliases, provides } = info;
         version = semver.parse(version);
 
@@ -34,7 +33,7 @@ class Runtime {
                         language: language.language,
                         aliases: language.aliases,
                         version,
-                        pkdir: packageDirectory,
+                        pkgdir: packageDirectory,
                         runtime: language,
                     })
                 );
@@ -50,12 +49,12 @@ class Runtime {
             );
         }
 
-        logger.info(`package ${language}: ${version} loaded`);
+        logger.info(`package ${language}: ${version} loaded from ${packageDirectory}`);
     }
 
-    get compiled(){T
+    get compiled(){
         if(this._compiled === undefined){
-            this._compiled == filesystem.existsSync(path.join(this.pkgdir,'compile'));
+            this._compiled = filesystem.existsSync(path.join(this.pkgdir, 'compile'));
         }
 
         return this._compiled;

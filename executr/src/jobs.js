@@ -48,15 +48,13 @@ class Job {
 
     async prime(){
         logger.info(`priming job ${this.uuid}`);
-        logger.info('writing cache');
-        logger.info(`transferring ownership from uid: ${this.UID} gid: ${this.GID}`);
-
         // set permission of directory to 700 - USER READ, WRITE, EXECUTE
         await filesystem.mkdir(this.directory, { mode: 0o700 });
-
-        // change UID and GID of the working directory
+        
+        // own the current directory
+        logger.info(`transferring ownership uid: ${this.UID} gid: ${this.GID} directory: ${this.directory}"`);
         await filesystem.chown(this.directory, this.UID, this.GID);
-
+        
         for (const file of this.files){
             let filePath = path.join(this.directory, file.name);
 
@@ -69,15 +67,14 @@ class Job {
     }
 
     // function to run code safely using prlimit
-    async safeCall(file, args, timeout, memoryLimit){
+    async safeCall(file, args, timeout, memoryLimit){        
         return new Promise((resolve, reject) => {
-            const noNetwork = config.disableNetworking ? ['nosocket'] : [];
-
+            const noNetwork = config.disableNetworking ? ['nosocket'] : []
             const processLimit = [
                 'prlimit',
                 '--nproc=' + config.maxProcessCount,
                 '--nofile=' + config.maxOpenFiles,
-                '--filesystemize=' + config.maxFileSize,
+                '--fsize=' + config.maxFileSize,
             ];
 
             // set memory limit if applicable
@@ -86,11 +83,11 @@ class Job {
             }
 
             const processCall = [...processLimit, ...noNetwork, 'bash', file, ...args];
-
             var stdout = '';
             var stderr = '';
             var output = '';
-
+            
+            // TODO- fix permission error
             const proc = childprocess.spawn(processCall[0], processCall.splice(1), {
                 env: {
                     ...this.runtime.environmentVariables,
@@ -103,15 +100,15 @@ class Job {
                 detached: true,
             });
 
+            
             proc.stdin.write(this.stdin);
             proc.stdin.end();
             proc.stdin.destroy();
 
-            const killTimeout = setTimeout(_ => proc.kill('SIGKILL'), timeout);
-
-            proc.sterr.on('data', data => {
+            const killTimeout = setTimeout( _ => proc.kill('SIGKILL'), timeout);
+            proc.stderr.on('data', data => {
                 if(stderr.length > config.maxOutputSize){
-                    proc.kill('SIGLKILL');
+                    proc.kill('SIGKILL');
                 } else {
                     stderr += data;
                     output += data;
@@ -122,8 +119,8 @@ class Job {
                 if(stdout.length > config.maxOutputSize){
                     proc.kill('SIGKILL');
                 } else {
-                    stderr += data;
-                    stderr += data;
+                    stdout += data;
+                    output += data;
                 }
             });
 
@@ -136,7 +133,7 @@ class Job {
 
             proc.on('exit', (code, signal) => {
                 cleanup();
-                resolve({error: err, stdout, stderr, output});
+                resolve({ stdout, stderr, code, signal, output });
             })
 
             proc.on('error', (err) => {
@@ -152,17 +149,23 @@ class Job {
         }
 
         logger.info(`executing job : ${this.uuid} uid: ${this.UID} gid: ${this.GID} on runtime: ${this.runtime.toString()}`);
-        logger.info('compiling');
-
+        
         let compile;
-
         if(this.runtime.compiled){
+            logger.info('compiling')
             compile = await this.safeCall(path.join(this.runtime.pkgdir, 'compile'),
                 this.files.map(x => x.name),
                 this.timeouts.compile,
                 this.memoryLimits.compile
             );
         }
+
+        logger.info('running')
+        const run = await this.safeCall(path.join(this.runtime.pkgdir, 'run'),
+            [this.files[0].name, ...this.args],
+            this.timeouts.run,
+            this.memoryLimits.run
+        );
 
         this.state = jobStates.EXECUTED;
 
@@ -175,17 +178,16 @@ class Job {
     }
 
     async cleanupProcesses(){
-        let processes = [1];
+        let processes = Promise.resolve([1]);
 
-        while(processess.length > 0){
+        while(processes.length > 0){
             processes = await new Promise((resolve, reject) => 
                 childprocess.execFile('ps', ['awwxo', 'pid,ruid'], (err, stdout) => {
                     if(err === null){
                         const lines = stdout.split('\n').slice(1);
                         const procs = lines.map(line => {
                             const [pid, ruid] = line.trim().split(/\s+/).map(n => parseInt(n));
-
-                            return {pid, ruid};
+                            return { pid, ruid };
                         });
 
                         resolve(procs);
@@ -195,7 +197,7 @@ class Job {
                 })
             );
 
-            processes = processes.filter(proc.ruid === this.UID);
+            processes = processes.filter(proc => proc.ruid === this.UID);
         
             for(const proc of processes){
                 try {

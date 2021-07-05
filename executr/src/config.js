@@ -25,7 +25,7 @@ const options = [
     {
         key: 'dataDirectory',
         description: 'PATH TO STORE EXECUTR DATA',
-        default: './datadir',
+        default: '/executr_data',
         validators: [ x => filesystem.existsSync(x) || `DIRECTORY ${x} DOES NOT EXIST`],
     },
 
@@ -86,7 +86,7 @@ const options = [
 
     {
         key: 'maxProcessCount',
-        description: 'SPECIFY MAX PROCESS SIZE',
+        description: 'SPECIFY MAX PROCESS COUNT',
         default: 64,
         parser: parseInt,
         validators: [(x, raw) => !isNaN(x) || `${raw} IS INVALID!`],

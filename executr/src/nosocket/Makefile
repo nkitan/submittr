@@ -2,7 +2,7 @@ CC = gcc
 CFLAGS = -O2 -Wall -lseccomp 
 TARGET = nosocket 
 BUILD_PATH = ./
-INSTALL_PATH = /usr/local/bin/
+INSTALL_PATH = /bin/
 SOURCE = nosocket.c
 
 all: $(TARGET)

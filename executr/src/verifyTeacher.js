@@ -1,6 +1,6 @@
 const axios = require('axios');
 require('dotenv').config();
-const logger = require('logplease').create('verify')
+const logger = require('logplease').create('verifyTeacher')
 
 const host = process.env.AUTH_HOST || 'localhost'
 const port = process.env.AUTH_PORT || 6969
@@ -31,9 +31,9 @@ module.exports = async (req, res, next) => {
 
         next();
     } catch (error) {
-        logger.error(error.message);
+        logger.error('verification failed');
         return res.status(500).json({
-            message: 'server error',
+            message: 'verification failed',
         });
     }
 }

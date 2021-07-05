@@ -8,7 +8,7 @@ module.exports = async (req, res, next) => {
     const token = req.body.token;
     if(!token){
         res.status(400).json({
-            "message": "no token supplied"
+            "message": "no token found"
         })
     }
 
@@ -28,9 +28,10 @@ module.exports = async (req, res, next) => {
                 message: 'database error'
             })
         }
-    } catch (error) {
-        logger.error(error.message);
+    } catch (err) {
+        logger.error(err.message);
         res.status(401).json({
+            valid: false,
             message: 'invalid token'
         });
     }
