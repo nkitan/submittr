@@ -1,16 +1,25 @@
 {
   "name": "databasr",
   "version": "0.0.1",
-  "description": "Databasr - Database API for Submittr",
+  "description": "database api to serve assignments",
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [
-    "node",
     "databasr",
-    "assignments"
+    "db",
+    "postgre"
   ],
   "author": "Ankit Das",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "cors": "^2.8.5",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "logplease": "^1.2.15",
+    "pg": "^8.6.0",
+    "serve-handler": "^6.1.3"
+  }
 }

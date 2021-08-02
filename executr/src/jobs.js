@@ -62,7 +62,7 @@ class Job {
                 curl.stdout.on('end', (data) =>  {
                     fileStream.end();
                     logger.info('downloaded ' + filePath);
-                    resolve()
+                    resolve();
                 });
     
                 curl.on('exit', (code) =>  {
@@ -81,7 +81,7 @@ class Job {
         await filesystem.mkdir(this.directory, { mode: 0o700 });
         
         // own the current directory
-        logger.info(`transferring ownership uid: ${this.UID} gid: ${this.GID} directory: ${this.directory}"`);
+        logger.info(`transferring ownership to uid: ${this.UID} gid: ${this.GID} directory: ${this.directory}"`);
         await filesystem.chown(this.directory, this.UID, this.GID);
         
         for (const file of this.files){

@@ -89,4 +89,4 @@ const app = express();
     app.listen(port, address, () => {
         logger.info('executr running @', config.bindAddress);
     });
-})(); // run index asynchronously
+})();

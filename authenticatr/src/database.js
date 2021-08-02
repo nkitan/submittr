@@ -1,6 +1,6 @@
 const Pool = require("pg").Pool;
 
-const db_password = process.env.DB_PASSWORD || "sarik";
+const db_password = process.env.DB_PASSWORD || "dbpassword";
 const db_host = process.env.DB_HOST || "localhost";
 const db_port = process.env.DB_PORT || 5432;
 const db_name = process.env.DB_NAME || "jwt";

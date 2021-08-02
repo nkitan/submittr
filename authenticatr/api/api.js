@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const axios = require('axios');
 const bcrypt = require('bcrypt');
 const logger = require('logplease').create('api');
 
@@ -94,17 +95,67 @@ router.post("/register", authorize, async (req, res) => {
             })
         }
         
+        const {
+            newuser        
+        } = req.body;
+        
+        
+        if(!newuser || typeof(newuser) !== 'object'){
+            return res.status(400).json({
+                message: 'newuser not specified!'
+            })
+        }
+
+        if(!newuser.username || typeof(newuser.username) !== 'string'){
+            return res.status(400).json({
+                message: 'username must be a string'
+            })
+        }
+    
+        if(!newuser.isAdmin || typeof(newuser.isAdmin) !== 'string'){
+            return res.status(400).json({
+                message: 'isAdmin must be string'
+            })
+        }
+
+        if(!newuser.isTeacher || typeof(newuser.isTeacher) !== 'string'){
+            return res.status(400).json({
+                message: 'isTeacher must be string'
+            })
+        }
+
+        if(!newuser.classes){
+            return res.status(400).json({
+                message: 'classes must be specified'
+            })
+        }
+
+        if(newuser.isTeacher === 'true' && typeof(newuser.classes) !== 'object'){
+            return res.status(400).json({
+                message: 'classes must be array for teachers'
+            })
+        }
+
+        if(newuser.isTeacher === 'false' && typeof(newuser.classes) !== 'string'){
+            return res.status(400).json({
+                message: 'classes must be string for students'
+            })
+        }
+
+        const databasrHost = process.env.DBSR_HOST || dbsr
+        const databasrPort = process.env.DBSR_PORT || 6971
+
         const users = await userpool.query("SELECT * FROM users")
-        const user = users.rows.find(user => user.username == req.body.newuser.username);
+        const user = users.rows.find(user => user.username == newuser.username);
         if(user != null){
-            res.status(400).json({
+            return res.status(400).json({
                 message: "user exists!"
             })
         }
         
         const hasher = async (saltRounds = 10) => {
             try {
-                return await bcrypt.hash(req.body.newuser.password, saltRounds);
+                return await bcrypt.hash(newuser.password, saltRounds);
             } catch (err) {
                 logger.error(err);
                 return null;
@@ -119,8 +170,15 @@ router.post("/register", authorize, async (req, res) => {
             })
         }
 
-        const newUser = await adminpool.query("INSERT INTO users (username, passwd, isAdmin, isTeacher) VALUES ($1, $2, $3, $4) RETURNING *", [req.body.newuser.username, hashed, req.body.newuser.isAdmin, req.body.newuser.isTeacher]);
+        const newUser = await adminpool.query("INSERT INTO users (username, passwd, isAdmin, isTeacher) VALUES ($1, $2, $3, $4) RETURNING *", [newuser.username, hashed, newuser.isAdmin, newuser.isTeacher]);
         const token = genJWT(newUser.rows[0].id);
+
+        
+        try {    
+            axios.post(`http://${databasrHost}:${databasrPort}/dbsr/add`, {id: newUser.rows[0].id, username: newuser.username, isTeacher: newuser.isTeacher, classes: newuser.classes }, {headers: {'content-type': 'application/json'}})
+        } catch(err){
+            throw new Error('error adding new user ' + err)
+        }
 
         logger.info('added user - ' + newUser.rows[0].id)
         res.status(200).json({id: newUser.rows[0].id, token: token});
@@ -137,6 +195,8 @@ router.post("/verify", authorize, (req, res) => {
     try {
       res.status(200).json({
           valid: true,
+          id: req.id,
+          username: req.username[0],
           isTeacher: req.isTeacher == 'false' ? false : true,
           isAdmin: req.isAdmin == 'false' ? false : true
         });
@@ -147,6 +207,6 @@ router.post("/verify", authorize, (req, res) => {
           message: 'server error!'
       });
     }
-  });
-  
-  module.exports = router;
+});
+
+module.exports = router;

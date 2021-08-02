@@ -1,34 +1,44 @@
-version: "3"
+version: "3.1"
 
 services:
-  submittr:
-    build: submittr
+  userdb:
+    image: ankit/auth_database:production
+    environment:
+      POSTGRES_PASSWORD: dbpassword
     ports:
-      - "6972:6972"
+      - 5432:5432
     volumes:
-      - ./submittr/serve:/var/www/
-
-  databasr: 
-    build: databasr
-    ports:
-      - "6971:6971"
-    env_file: 
-      - databasr.env
-    volumes:
-      - ./databasr/:/databasr
+      - /pgdata:/pgdata
 
   authenticatr: 
-    build: authenticatr
+    image: ankit/authenticatr:production
+    command: "cd /root/authenticatr && node ."
     ports:
-      - "6970:6970"
-    env_file: 
-      - authenticatr.env
+      - 6969:6969
     volumes:
-      - ./authenticatr/:/authenticatr
-    
+      - authenticatr:/root/authenticatr
+
   executr:
-    build: executr
+    image: ankit/executr:production
+    command: "cd /root/executr && node ."
     ports:
-      - "6969:6969"
+      - 6970:6970
     volumes:
-      - ./executr/:/executr
+      - executr:/root/executr
+
+  databasr:
+    image: ankit/databasr:production
+    command: "cd /root/databasr && node ."
+    ports:
+      - 6971:6971
+    volumes:
+      - databasr:/root/databasr
+      - /databasrpg:/databasr
+
+  submittr:
+    image: ankit/submittr:production
+    command: "cd /root/submittr && node ."
+    ports:
+      - 6972:6972
+    volumes:
+      - submittr:/root/submittr

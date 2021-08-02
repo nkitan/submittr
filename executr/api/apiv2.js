@@ -72,7 +72,7 @@ router.post('/execute', verifyTeacher, async (req, res) => {
         for (const [i, file] of files.entries()) {
             if (typeof file.content !== 'string') {
                 return res.status(400).json({
-                    message: `file[${i}]: content is required as a string`,
+                    message: `file[${i}]: content is required as a URL string`,
                 });
             }
 

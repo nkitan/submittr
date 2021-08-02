@@ -15,9 +15,11 @@ module.exports = async (req, res, next) => {
     try {    
         const payload = jwt.verify(token, process.env.JWT_SECRET);
         req.id = payload.id;
+
         try {
             req.isAdmin = Object.values((await userpool.query("SELECT isadmin FROM users WHERE id = $1", [payload.id])).rows[0])
             req.isTeacher = Object.values((await userpool.query("SELECT isteacher FROM users WHERE id = $1", [payload.id])).rows[0])
+            req.username = Object.values((await userpool.query("SELECT username FROM users WHERE id = $1", [payload.id])).rows[0])
 
             next();
         }
