@@ -26,7 +26,6 @@ router.use((req, res, next) => {
     next();
 })
 
-//TODO - script to make nosocket available always
 router.post('/execute', verifyTeacher, async (req, res) => {
     logger.info('request to execute recieved');
     try{

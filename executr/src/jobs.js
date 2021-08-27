@@ -77,9 +77,14 @@ class Job {
         };
 
         logger.info(`priming job ${this.uuid}`);
-        // set permission of directory to 700 - USER READ, WRITE, EXECUTE
-        await filesystem.mkdir(this.directory, { mode: 0o700 });
         
+        try {
+            // create temporary job directory
+            await filesystem.mkdir(this.directory, { mode: 0o700 });   
+        } catch (error) {
+            logger.error("couldn't create directory: " + error)
+        }
+
         // own the current directory
         logger.info(`transferring ownership to uid: ${this.UID} gid: ${this.GID} directory: ${this.directory}"`);
         await filesystem.chown(this.directory, this.UID, this.GID);
@@ -115,7 +120,6 @@ class Job {
             var stderr = '';
             var output = '';
             
-            // TODO- fix permission error
             const proc = childprocess.spawn(processCall[0], processCall.splice(1), {
                 env: {
                     ...this.runtime.environmentVariables,
@@ -178,6 +182,7 @@ class Job {
 
         logger.info(`executing job : ${this.uuid} uid: ${this.UID} gid: ${this.GID} on runtime: ${this.runtime.toString()}`);
         
+        //TODO - Fix no compile on second request
         let compile;
         if(this.runtime.compiled){
             logger.info('compiling')

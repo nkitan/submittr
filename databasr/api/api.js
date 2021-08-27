@@ -548,7 +548,7 @@ router.post('/submit', verify, async (req, res) => {
             let fileDirectory = path.join(config.dataDirectory, dataDirectories.submissions, assignmentID, req.id);
 
             if(filesystem.existsSync(fileDirectory)){
-                filesystem.rmdir(fileDirectory, (err) => {
+                filesystem.rm(fileDirectory, {recursive: true, force: true}, (err) => {
                     if(err){
                         throw new Error('could not delete existing directory ' + err)
                     }
