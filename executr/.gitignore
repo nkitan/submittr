@@ -1,3 +1,5 @@
 .env
-./node_modules/
-./datadir/
+node_modules/
+datadir/
+./datadir
+datadir
