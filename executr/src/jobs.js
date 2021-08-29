@@ -117,6 +117,7 @@ class Job {
 
             const processCall = [...processLimit, ...noNetwork, 'bash', file, ...args];
             logger.debug('command: ' + processCall)
+            logger.debug('language: ' + this.runtime.language)
             var stdout = '';
             var stderr = '';
             var output = '';
