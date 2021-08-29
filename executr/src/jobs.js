@@ -182,7 +182,6 @@ class Job {
 
         logger.info(`executing job : ${this.uuid} uid: ${this.UID} gid: ${this.GID} on runtime: ${this.runtime.toString()}`);
         
-        //TODO - Fix no compile on second request
         let compile;
         if(this.runtime.compiled){
             logger.info('compiling')
