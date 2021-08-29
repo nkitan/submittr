@@ -182,9 +182,9 @@ class Job {
 
         logger.info(`executing job : ${this.uuid} uid: ${this.UID} gid: ${this.GID} on runtime: ${this.runtime.toString()}`);
         
-        //TODO - Fix no compile on second request
         let compile;
         if(this.runtime.compiled){
+            logger.debug('compiling ' + this.uuid + ' compiled? ' + this.runtime.compiled)
             logger.info('compiling')
             compile = await this.safeCall(path.join(this.runtime.pkgdir, 'compile'),
                 this.files.map(x => x.name),
