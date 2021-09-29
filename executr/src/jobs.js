@@ -123,15 +123,15 @@ class Job {
             var output = '';
             
             const proc = childprocess.spawn(processCall[0], processCall.splice(1), {
-                env: {
-                    ...this.runtime.environmentVariables,
-                    EXECUTR_LANGUAGE: this.runtime.language,
-                },
                 stdio: 'pipe',
                 cwd: this.directory,
                 uid: this.UID,
                 gid: this.GID,
                 detached: true,
+                env: {
+                    ...this.runtime.environmentVariables,
+                    EXECUTR_LANGUAGE: this.runtime.language,
+                }
             });
 
             
@@ -194,7 +194,7 @@ class Job {
             );
         }
 
-        logger.info('running' + this.uuid)
+        logger.info('running ' + this.uuid)
         const run = await this.safeCall(path.join(this.runtime.pkgdir, 'run'),
             [this.files[0].name, ...this.args],
             this.timeouts.run,

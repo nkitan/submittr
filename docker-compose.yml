@@ -1,44 +1,32 @@
-version: "3.1"
-
+version: "3.9"
 services:
-  userdb:
-    image: ankit/auth_database:production
+  users:
+    image: ankit/auth_database:latest
     environment:
       POSTGRES_PASSWORD: dbpassword
     ports:
-      - 5432:5432
+     - 5432:5432
     volumes:
-      - /pgdata:/pgdata
-
+     - /pgdata:/pgdata
   authenticatr: 
-    image: ankit/authenticatr:production
-    command: "cd /root/authenticatr && node ."
-    ports:
-      - 6969:6969
-    volumes:
-      - authenticatr:/root/authenticatr
-
+   image: ankit/authenticatr:test
+   command: "bash -c 'cd /root/authenticatr && npm install && node .'"
+   ports:
+     - 6969:6969
+   volumes:
+      - .authenticatr/:/root/authenticatr
   executr:
-    image: ankit/executr:production
-    command: "cd /root/executr && node ."
-    ports:
+   image: ankit/executr:test
+   command: "bash -c 'cd /root/executr && npm install && node .'"
+   ports:
       - 6970:6970
-    volumes:
-      - executr:/root/executr
-
+   volumes:
+       - .executr/:/root/executr
   databasr:
-    image: ankit/databasr:production
-    command: "cd /root/databasr && node ."
-    ports:
-      - 6971:6971
-    volumes:
-      - databasr:/root/databasr
-      - /databasrpg:/databasr
-
-  submittr:
-    image: ankit/submittr:production
-    command: "cd /root/submittr && node ."
-    ports:
-      - 6972:6972
-    volumes:
-      - submittr:/root/submittr
+   image: ankit/databasr:latest
+   command: "bash -c 'apt update && apt install node && cd /root/databasr && npm install && node .'"
+   ports:
+     - 6971:6971
+   volumes:
+     - .databasr/:/root/databasr
+     - /databasrpg:/pgdata  
