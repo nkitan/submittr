@@ -611,7 +611,10 @@ router.post('/getSubmissions', verify, async (req, res) => {
         let assignmentDirectory = path.join(config.dataDirectory, dataDirectories.submissions, assignmentID);
         filesystem.readdir(assignmentDirectory, (err, files) => {
             if(err){
-                throw new Error('error reading ' + err)
+                logger.error('error reading ' + files)
+                return res.status(500).json({
+                    message: "assignment does not exist!"
+                })
             }
 
             return res.status(200).json({

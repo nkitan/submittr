@@ -1,0 +1,35 @@
+version: "3.9"
+services:
+  users:
+    image: ankit/auth_database:v1
+    environment:
+      POSTGRES_PASSWORD: dbpassword
+    ports:
+     - 5432:5432
+    volumes:
+     - /pgdata:/pgdata
+  
+  authenticatr: 
+   image: ankit/authenticatr:v2
+   command: "bash -c 'cd /root/authenticatr && npm install && node .'"
+   ports:
+     - 6969:6969
+   volumes:
+      - ~/projects/submittr/authenticatr/:/root/authenticatr/
+  
+  executr:
+   image: ankit/executr:v2
+   command: "bash -c 'su root && cd /root/executr && npm install && node .'"
+   ports:
+      - 6970:6970
+   volumes:
+       - ~/projects/submittr/executr/:/root/executr/
+
+  databasr:
+   image: ankit/databasr:v2
+   command: "bash -c 'cd /root/databasr && npm install && node .'"
+   ports:
+     - 6971:6971
+   volumes:
+     - ~/projects/submittr/databasr/:/root/databasr/
+     - /databasrpg:/pgdata  

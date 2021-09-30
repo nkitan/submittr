@@ -4,6 +4,7 @@ const app = express();
 const cors = require('cors');
 const handler = require('serve-handler');
 const http = require('http');
+logger.info(require('dotenv').config());
 
 const fileserver = http.createServer((request, response) => {
   return handler(request, response);
