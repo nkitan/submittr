@@ -1,0 +1,14 @@
+{
+  "name": "routr",
+  "version": "0.0.1",
+  "description": "route incoming traffic to specific services",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "routr"
+  ],
+  "author": "Ankit Das",
+  "license": "ISC"
+}

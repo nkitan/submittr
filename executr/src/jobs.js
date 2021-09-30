@@ -116,20 +116,22 @@ class Job {
             }
 
             const processCall = [...processLimit, ...noNetwork, 'bash', file, ...args];
+            logger.debug('command: ' + processCall)
+            logger.debug('language: ' + this.runtime.language)
             var stdout = '';
             var stderr = '';
             var output = '';
             
             const proc = childprocess.spawn(processCall[0], processCall.splice(1), {
-                env: {
-                    ...this.runtime.environmentVariables,
-                    EXECUTR_LANGUAGE: this.runtime.language,
-                },
                 stdio: 'pipe',
                 cwd: this.directory,
                 uid: this.UID,
                 gid: this.GID,
                 detached: true,
+                env: {
+                    ...this.runtime.environmentVariables,
+                    EXECUTR_LANGUAGE: this.runtime.language,
+                }
             });
 
             
@@ -184,7 +186,7 @@ class Job {
         
         let compile;
         if(this.runtime.compiled){
-            logger.info('compiling')
+            logger.debug('compiling ' + this.uuid + ' compiled? ' + this.runtime.compiled)
             compile = await this.safeCall(path.join(this.runtime.pkgdir, 'compile'),
                 this.files.map(x => x.name),
                 this.timeouts.compile,
@@ -192,7 +194,7 @@ class Job {
             );
         }
 
-        logger.info('running')
+        logger.info('running ' + this.uuid)
         const run = await this.safeCall(path.join(this.runtime.pkgdir, 'run'),
             [this.files[0].name, ...this.args],
             this.timeouts.run,

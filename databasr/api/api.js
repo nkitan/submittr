@@ -578,7 +578,7 @@ router.post('/submit', verify, async (req, res) => {
 
             return res.status(200).json({
                 message : 'submitted successfully',
-                id : req.id
+                student : req.id
             })
 
         } catch(err){
@@ -597,6 +597,12 @@ router.post('/submit', verify, async (req, res) => {
 })
 
 router.post('/getSubmissions', verify, async (req, res) => {
+    if(!req.isTeacher){
+        return res.status(401).json({
+            message: 'must be a teacher to view submissions'
+        })
+    }
+
     try {
         const {
             assignmentID
@@ -605,7 +611,10 @@ router.post('/getSubmissions', verify, async (req, res) => {
         let assignmentDirectory = path.join(config.dataDirectory, dataDirectories.submissions, assignmentID);
         filesystem.readdir(assignmentDirectory, (err, files) => {
             if(err){
-                throw new Error('error reading ' + err)
+                logger.error('error reading ' + files)
+                return res.status(500).json({
+                    message: "assignment does not exist!"
+                })
             }
 
             return res.status(200).json({
@@ -624,14 +633,13 @@ router.post('/getSubmissions', verify, async (req, res) => {
 router.post('/getSubmission', verify, async (req, res) => {
     try{
         const {
-            assignmentID,
-            studentID,
+            assignmentID
         } = req.body;
 
-        let submissionDirectory = path.join(config.dataDirectory, dataDirectories.submissions, assignmentID, studentID);
+        let submissionDirectory = path.join(config.dataDirectory, dataDirectories.submissions, assignmentID, req.id);
         if(!filesystem.existsSync(submissionDirectory)){
             return res.status(400).json({
-                message: 'submssion does not exist'
+                message: 'submission does not exist'
             })
         }
 

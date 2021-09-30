@@ -26,6 +26,6 @@
     "path": "^0.12.7",
     "semver": "^7.3.5",
     "uuid": "^8.3.2",
-    "waitpid": "git+https://github.com/HexF/node-waitpid.git"
+    "waitpid": "file:../node-waitpid"
   }
 }
