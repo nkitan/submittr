@@ -1,3 +1,0 @@
-1. Create MySQL Docker
-2. Create Database -Submittr - Table - Users(user,hashd,isTeacher,isAdmin,token)
-3. Create API
