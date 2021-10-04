@@ -9,6 +9,8 @@ const genJWT = require('../src/jwt')
 const check = require('../src/check')
 const authorize = require('../src/authorize')
 
+const tokenList = {}
+
 router.post("/login", check, async (req, res) => {
     try {  
         const users = await userpool.query("SELECT * FROM users")
@@ -28,8 +30,19 @@ router.post("/login", check, async (req, res) => {
                 })
             }
             if (results) {
-                const token = genJWT(user.id, user.isAdmin, user.isTeacher);
-                return res.json({message: 'success', token: token});
+                const token = genJWT(user, process.env.JWT_SECRET, process.env.JWT_EXPIRY + 'm');
+                const refreshToken = genJWT(user, process.env.REFRESH_SECRET, process.env.REFRESH_EXPIRY + ' days')
+                tokenList[refreshToken] = { user: user, token: token, refreshToken: refreshToken}
+
+                res.cookie("refreshToken", refreshToken, {
+                    httpOnly: true,
+                    sameSite: "strict",
+                    secure: process.env.NODE_ENV !== "development",
+                    expires: new Date(new Date().getTime() + (parseInt(process.env.REFRESH_EXPIRY) * 24 * 60 * 60 * 1000))
+                });
+
+                return res.json({ message: 'success', token: token, expiresIn: new Date(new Date().getTime() + (parseInt(process.env.JWT_EXPIRY) * 60000))});
+                
             } else {
                 return res.status(401).json({
                     message: 'invalid credentials',
@@ -41,6 +54,25 @@ router.post("/login", check, async (req, res) => {
         logger.error(err.message);
         return res.status(500).json({
             message: 'database error!',
+        })
+    }
+})
+
+router.get("/refresh", authorize, async (req, res) => {
+    const refreshToken = req.cookies.refreshToken;
+    if((refreshToken) && (refreshToken in tokenList)) {
+        const user = tokenList[refreshToken]
+        const token = genJWT(user, process.env.JWT_SECRET, process.env.JWT_EXPIRY + 'm');
+        tokenList[refreshToken].token = token
+
+        return res.status(200).json({
+            token: token,
+            expiresIn: new Date(new Date().getTime() + (parseInt(process.env.JWT_EXPIRY) * 60000))
+        })
+
+    } else {
+        return res.status(401).json({
+            message: "invalid refresh token"
         })
     }
 })
@@ -191,7 +223,7 @@ router.post("/register", authorize, async (req, res) => {
     }
 })
 
-router.post("/verify", authorize, (req, res) => {
+router.get("/verify", authorize, (req, res) => {
     try {
       res.status(200).json({
           valid: true,

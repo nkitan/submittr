@@ -14,7 +14,7 @@ module.exports = async (req, res, next) => {
     }
 
     try {    
-        const response = await axios.post(`http://${host}:${port}/auth/verify`, { token : token }, {headers: {'content-type': 'application/json'}})
+        const response = await axios.get(`http://${host}:${port}/auth/verify`, {headers: {'content-type': 'application/json' ,'authorization' : token }})
         if(!response.data.isTeacher){
             logger.info('user not a teacher')
             return res.status(400).json({

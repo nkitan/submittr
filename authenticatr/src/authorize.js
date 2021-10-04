@@ -5,14 +5,14 @@ const { userpool } = require('../src/database');
 require('dotenv').config();
 
 module.exports = async (req, res, next) => {
-    const token = req.body.token;
-    if(!token){
-        res.status(400).json({
-            "message": "no token found"
-        })
-    }
-
-    try {    
+    try { 
+        if(!req.headers.authorization){
+            res.status(400).json({
+                "message": "no token found"
+            })
+        }
+        
+        const token = req.headers.authorization;   
         const payload = jwt.verify(token, process.env.JWT_SECRET);
         req.id = payload.id;
 
@@ -30,6 +30,7 @@ module.exports = async (req, res, next) => {
                 message: 'database error'
             })
         }
+
     } catch (err) {
         logger.error(err.message);
         res.status(401).json({

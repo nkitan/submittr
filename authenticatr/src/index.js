@@ -2,14 +2,16 @@ const logger = require('logplease').create('authenticatr');
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 logger.info(require('dotenv').config());
 
 const host = process.env.AUTH_HOST || 'localhost';
 const port = process.env.AUTH_PORT || 6970;
-
+const corsOptions = {credentials: true, origin: "*", methods: ["GET", "POST"], allowedHeaders: ['Content-Type', 'Authorization']};
 
 app.use(express.json());
-app.use(cors());
+app.use(cors(corsOptions));
+app.use(cookieParser());
 
 app.use("/auth", require('../api/api'));
 
