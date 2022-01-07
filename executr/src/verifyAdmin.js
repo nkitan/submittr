@@ -6,7 +6,7 @@ const host = process.env.AUTH_HOST || 'localhost'
 const port = process.env.AUTH_PORT || 6969
 
 module.exports = async (req, res, next) => {
-    const token = req.body.token;
+    const token = req.headers.Authorization;
     if(!token){
         return res.status(401).send({
             message: 'not authorized',
@@ -14,7 +14,7 @@ module.exports = async (req, res, next) => {
     }
 
     try {    
-        const response = await axios.post(`http://${host}:${port}/auth/verify`, { token : token }, {headers: {'content-type': 'application/json'}})
+        const response = await axios.get(`http://${host}:${port}/auth/verify`, {headers: {'content-type': 'application/json' ,'authorization' : token }})
         if(!response.data.isAdmin){
             logger.info('user not an admin')
             return res.status(400).json({
