@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   users:
-    image: ankit/auth_database:v1
+    image: nkitan/auth_database:v1
     environment:
       POSTGRES_PASSWORD: dbpassword
     networks:
@@ -13,7 +13,7 @@ services:
      - /pgdata:/pgdata
   
   executr:
-   image: ankit/executr:v2
+   image: nkitan/executr:v2
    command: "bash -c 'cd /root/executr && npm install && node .'"
    networks:
      internal:
@@ -24,7 +24,7 @@ services:
        - ~/projects/submittr/executr/:/root/executr/  
 
   authenticatr: 
-   image: ankit/authenticatr:v2
+   image: nkitan/authenticatr:v2
    command: "bash -c 'cd /root/authenticatr && npm install cookie-parser && node .'"
    networks:
      internal:
@@ -35,7 +35,7 @@ services:
       - ~/projects/submittr/authenticatr/:/root/authenticatr/
 
   databasr:
-   image: ankit/databasr:v2
+   image: nkitan/databasr:v2
    command: bash -c "su postgres -c 'pg_ctl -D /pgdata start' && cd /root/databasr && npm install && node ."
    networks:
       internal:
