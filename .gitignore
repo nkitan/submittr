@@ -1,2 +1,3 @@
 deprecated/
 executr/datadir/packages/python/3.9.4/pkg.tar.gz
+*.tar
