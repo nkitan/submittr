@@ -41,7 +41,17 @@ router.post("/login", check, async (req, res) => {
                     expires: new Date(new Date().getTime() + (parseInt(process.env.REFRESH_EXPIRY) * 24 * 60 * 60 * 1000))
                 });
 
-                return res.json({ message: 'success', token: token, expiresIn: new Date(new Date().getTime() + (parseInt(process.env.JWT_EXPIRY) * 60000))});
+                res.cookie("token", token, {
+                    httpOnly: true,
+                    sameSite: "strict",
+                    secure: process.env.NODE_ENV !== "development",
+                    expires: new Date(new Date().getTime() + (parseInt(process.env.JWT_EXPIRY) * 60 * 1000))
+                });
+
+                return res.json({ 
+                    message: 'success', 
+                    expiresIn: new Date(new Date().getTime() + (parseInt(process.env.JWT_EXPIRY) * 60000))
+                });
                 
             } else {
                 return res.status(401).json({
@@ -65,8 +75,15 @@ router.get("/refresh", authorize, async (req, res) => {
         const token = genJWT(user, process.env.JWT_SECRET, process.env.JWT_EXPIRY + 'm');
         tokenList[refreshToken].token = token
 
+        res.cookie("token", token, {
+            httpOnly: true,
+            sameSite: "strict",
+            secure: process.env.NODE_ENV !== "development",
+            expires: new Date(new Date().getTime() + (parseInt(process.env.JWT_EXPIRY) * 60 * 1000))
+        });
+
         return res.status(200).json({
-            token: token,
+            message: 'success',
             expiresIn: new Date(new Date().getTime() + (parseInt(process.env.JWT_EXPIRY) * 60000))
         })
 
