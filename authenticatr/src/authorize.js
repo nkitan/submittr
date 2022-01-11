@@ -13,9 +13,8 @@ module.exports = async (req, res, next) => {
         } else {
         // TODO fix error when cannot refresh more than once
             try {
-                const payload = await jwt.verify(req.cookies.token, process.env.JWT_SECRET)
-
-                if(payload === null){
+                const payload = jwt.verify(req.cookies.token, process.env.JWT_SECRET)
+                if(payload === null || payload === undefined){
                     throw new Error('failed to verify, could not parse payload')
                 }
 

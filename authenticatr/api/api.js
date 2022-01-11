@@ -71,8 +71,8 @@ router.post("/login", check, async (req, res) => {
 router.get("/refresh", authorize, async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
     if((refreshToken) && (refreshToken in tokenList)) {
-        const user = tokenList[refreshToken]
-        const token = genJWT(user, process.env.JWT_SECRET, process.env.JWT_EXPIRY + 'm');
+        const tokenListItem = tokenList[refreshToken]
+        const token = genJWT(tokenListItem.user, process.env.JWT_SECRET, process.env.JWT_EXPIRY + 'm');
         tokenList[refreshToken].token = token
 
         res.cookie("token", token, {
