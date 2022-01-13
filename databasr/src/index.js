@@ -2,9 +2,11 @@ const logger = require('logplease').create('databasr')
 const express = require('express');
 const app = express();
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const handler = require('serve-handler');
 const http = require('http');
 logger.info(require('dotenv').config());
+const corsOptions = {credentials: true, origin: "http://localhost:3000", methods: ["GET", "POST"], allowedHeaders: ['Content-Type'], exposedHeaders: ["set-cookie"]};
 
 const fileserver = http.createServer((request, response) => {
   return handler(request, response);
@@ -16,7 +18,8 @@ const filePort = process.env.DBSR_FILEPORT || 6972;
 
 (async () => {
     app.use(express.json());
-    app.use(cors());
+    app.use(cors(corsOptions));
+    app.use(cookieParser());
 
     app.use("/dbsr", require('../api/api'));
 

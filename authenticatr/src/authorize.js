@@ -5,13 +5,12 @@ const { userpool } = require('../src/database');
 require('dotenv').config();
 
 module.exports = async (req, res, next) => {   
-    try { 
+    try {
         if(!req.cookies.token){
             return res.status(400).json({
                 "message": "no token found"
             })
         } else {
-        // TODO fix error when cannot refresh more than once
             try {
                 const payload = jwt.verify(req.cookies.token, process.env.JWT_SECRET)
                 if(payload === null || payload === undefined){
@@ -36,7 +35,7 @@ module.exports = async (req, res, next) => {
             } catch (error) {
                 logger.error(error.message)
                 return res.status(401).json({
-                    message: "couldn't refresh"
+                    message: "invalid token"
                 })
             }
         }
@@ -45,7 +44,7 @@ module.exports = async (req, res, next) => {
         logger.error(error.message);
         return res.status(401).json({
             valid: false,
-            message: 'invalid token'
+            message: 'no token specified'
         });
     }
 }

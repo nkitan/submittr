@@ -88,7 +88,7 @@ router.post('/add', async (req, res) => {
     }
 })
 
-router.post('/fetch', verify, async (req, res) => {
+router.get('/fetch', verify, async (req, res) => {
     if(req.isTeacher){
         try{
             let teachers = [];
@@ -426,7 +426,7 @@ router.post('/getAssignment', verify, async (req, res) => {
     }
 })
 
-router.post('/getAssignments', verify, async (req, res) => {
+router.get('/getAssignments', verify, async (req, res) => {
     try {
         const assignments = await userpool.query("SELECT id, marks, deadline, classes FROM assignments;")
         let list = [];

@@ -1,0 +1,91 @@
+0 verbose cli [
+0 verbose cli   '/usr/bin/node',
+0 verbose cli   '/usr/bin/npm',
+0 verbose cli   'install',
+0 verbose cli   'axios-cookiejar',
+0 verbose cli   'tough-cookie'
+0 verbose cli ]
+1 info using npm@8.1.0
+2 info using node@v16.13.0
+3 timing npm:load:whichnode Completed in 0ms
+4 timing config:load:defaults Completed in 1ms
+5 timing config:load:file:/usr/lib/node_modules/npm/npmrc Completed in 1ms
+6 timing config:load:builtin Completed in 1ms
+7 timing config:load:cli Completed in 2ms
+8 timing config:load:env Completed in 1ms
+9 timing config:load:file:/home/notroot/projects/submittr/databasr/.npmrc Completed in 0ms
+10 timing config:load:project Completed in 1ms
+11 verbose config tmp This setting is no longer used.  npm stores temporary files in a special
+11 verbose config location in the cache, and they are managed by
+11 verbose config     [`cacache`](http://npm.im/cacache).
+12 timing config:load:file:/home/notroot/.config/npm/npmrc Completed in 2ms
+13 timing config:load:user Completed in 2ms
+14 timing config:load:file:/home/notroot/.local/share/npm/etc/npmrc Completed in 0ms
+15 timing config:load:global Completed in 0ms
+16 timing config:load:validate Completed in 1ms
+17 timing config:load:credentials Completed in 1ms
+18 timing config:load:setEnvs Completed in 1ms
+19 timing config:load Completed in 11ms
+20 timing npm:load:configload Completed in 11ms
+21 timing npm:load:setTitle Completed in 0ms
+22 timing npm:load:setupLog Completed in 0ms
+23 timing config:load:flatten Completed in 3ms
+24 timing npm:load:cleanupLog Completed in 3ms
+25 timing npm:load:configScope Completed in 0ms
+26 timing npm:load:projectScope Completed in 0ms
+27 timing npm:load Completed in 19ms
+28 timing arborist:ctor Completed in 1ms
+29 timing idealTree:init Completed in 65ms
+30 timing idealTree:userRequests Completed in 2ms
+31 silly idealTree buildDeps
+32 silly fetch manifest axios-cookiejar@*
+33 timing arborist:ctor Completed in 0ms
+34 http fetch GET 404 https://registry.npmjs.org/axios-cookiejar 1317ms (cache skip)
+35 http fetch GET 404 https://registry.npmjs.org/axios-cookiejar 1322ms (cache skip)
+36 silly fetch manifest tough-cookie@*
+37 http fetch GET 200 https://registry.npmjs.org/tough-cookie 95ms (cache miss)
+38 silly placeDep ROOT axios-cookiejar@ OK for: databasr@0.0.1 want: *
+39 silly placeDep ROOT tough-cookie@4.0.0 OK for: databasr@0.0.1 want: *
+40 silly fetch manifest psl@^1.1.33
+41 silly fetch manifest punycode@^2.1.1
+42 silly fetch manifest universalify@^0.1.2
+43 http fetch GET 200 https://registry.npmjs.org/punycode 12ms (cache hit)
+44 http fetch GET 200 https://registry.npmjs.org/psl 95ms (cache miss)
+45 http fetch GET 200 https://registry.npmjs.org/universalify 140ms (cache miss)
+46 timing idealTree:#root Completed in 2895ms
+47 timing idealTree:node_modules/axios-cookiejar Completed in 0ms
+48 silly placeDep ROOT psl@1.8.0 OK for: tough-cookie@4.0.0 want: ^1.1.33
+49 silly placeDep node_modules/tough-cookie punycode@2.1.1 OK for: tough-cookie@4.0.0 want: ^2.1.1
+50 silly placeDep ROOT universalify@0.1.2 OK for: tough-cookie@4.0.0 want: ^0.1.2
+51 timing idealTree:node_modules/tough-cookie Completed in 11ms
+52 timing idealTree:node_modules/psl Completed in 0ms
+53 timing idealTree:node_modules/universalify Completed in 0ms
+54 timing idealTree:node_modules/tough-cookie/node_modules/punycode Completed in 0ms
+55 timing idealTree:buildDeps Completed in 2909ms
+56 timing idealTree:fixDepFlags Completed in 2ms
+57 timing idealTree Completed in 2979ms
+58 timing command:install Completed in 2997ms
+59 verbose stack HttpErrorGeneral: 404 Not Found - GET https://registry.npmjs.org/axios-cookiejar - Not found
+59 verbose stack     at /usr/lib/node_modules/npm/node_modules/npm-registry-fetch/check-response.js:95:15
+59 verbose stack     at processTicksAndRejections (node:internal/process/task_queues:96:5)
+59 verbose stack     at async Arborist.[nodeFromEdge] (/usr/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:1061:19)
+59 verbose stack     at async Arborist.[buildDepStep] (/usr/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:930:11)
+59 verbose stack     at async Arborist.buildIdealTree (/usr/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/build-ideal-tree.js:216:7)
+59 verbose stack     at async Promise.all (index 1)
+59 verbose stack     at async Arborist.reify (/usr/lib/node_modules/npm/node_modules/@npmcli/arborist/lib/arborist/reify.js:149:5)
+59 verbose stack     at async Install.install (/usr/lib/node_modules/npm/lib/install.js:170:5)
+60 verbose statusCode 404
+61 verbose pkgid axios-cookiejar@*
+62 verbose cwd /home/notroot/projects/submittr/databasr
+63 verbose Linux 5.15.12-200.fc35.x86_64
+64 verbose argv "/usr/bin/node" "/usr/bin/npm" "install" "axios-cookiejar" "tough-cookie"
+65 verbose node v16.13.0
+66 verbose npm  v8.1.0
+67 error code E404
+68 error 404 Not Found - GET https://registry.npmjs.org/axios-cookiejar - Not found
+69 error 404
+70 error 404 'axios-cookiejar@*' is not in this registry.
+71 error 404 You should bug the author to publish it (or use the name yourself!)
+72 error 404 Note that you can also install from a
+73 error 404 tarball, folder, http url, or git url.
+74 verbose exit 1

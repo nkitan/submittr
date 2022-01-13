@@ -68,6 +68,32 @@ router.post("/login", check, async (req, res) => {
     }
 })
 
+router.get("/logout", authorize, async (req, res) => {
+    const refreshToken = req.cookies.refreshToken;
+    if((refreshToken) && (refreshToken in tokenList)) {
+        tokenList[refreshToken] = {}
+    }
+    
+    res.cookie("refreshToken", "", {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV !== "development",
+        expires: new Date(new Date().getTime() - 100)
+    });
+
+    res.cookie("token", "", {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: process.env.NODE_ENV !== "development",
+        expires: new Date(new Date().getTime() - 100)
+    });
+
+    return res.json({ 
+        message: 'success', 
+        expiresIn: "expired"
+    });  
+})
+
 router.get("/refresh", authorize, async (req, res) => {
     const refreshToken = req.cookies.refreshToken;
     if((refreshToken) && (refreshToken in tokenList)) {
