@@ -6,15 +6,14 @@ const host = process.env.AUTH_HOST || 'localhost'
 const port = process.env.AUTH_PORT || 6969
 
 module.exports = async (req, res, next) => {
-    const token = req.body.token;
-    if(!token){
-        return res.status(401).send({
-            message: 'not authorized',
-        })
-    }
-
     try {    
-        const response = await axios.get(`http://${host}:${port}/auth/verify`, {headers: {'content-type': 'application/json' ,'authorization' : token }})
+        if(!req.cookies.token){
+            return res.status(401).send({
+                message: 'token not found',
+            })
+        }
+        
+        const response = await axios.get(`http://${host}:${port}/auth/verify`, {headers: {'content-type': 'application/json' ,'Cookie' : "token=" + req.cookies.token + ";" }, withCredentials: true })
         if(!response.data.isTeacher){
             logger.info('user not a teacher')
             return res.status(400).json({
