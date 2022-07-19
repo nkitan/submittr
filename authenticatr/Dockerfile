@@ -22,4 +22,4 @@ RUN npm install /root/authenticatr/
 EXPOSE 6969
 
 # START SERVER
-CMD ["node","/root/authenticatr/"]
+run npm start

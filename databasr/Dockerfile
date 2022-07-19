@@ -5,7 +5,7 @@ ENV POSTGRES_PASSOWRD=toor
 LABEL author = "Ankit Das"
 
 # USE SQL SCRIPTS TO SET UP TABLE
-COPY ./SQLscripts/ /docker-entrypoint-initdb.d/
+COPY .scripts/* /docker-entrypoint-initdb.d/
 
 # INSTALL NODE
 RUN apt-get -y update
@@ -16,7 +16,7 @@ RUN mkdir /databasr/
 
 # INSTALL REQUIREMENTS
 WORKDIR /databasr
-COPY ["package.json", "package-lock.json", "/databasr/"]
+COPY ["package.json", "/databasr/"]
 RUN npm install /databasr
 
 # COPY DATA FROM BASE DIRECTORY TO CONTAINER

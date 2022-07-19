@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-
 const express = require('express');
 const fspromises = require('fs/promises');
 const path = require('path');
