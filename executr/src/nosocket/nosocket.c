@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
     // Add 32 bit and 64 bit architectures to seccomp filter
     int rc;
     uint32_t arch[] = {SCMP_ARCH_X86_64, SCMP_ARCH_X86, SCMP_ARCH_X32};
+
     // We first remove the existing arch, otherwise our subsequent call to add
     // it will fail
     seccomp_arch_remove(ctx, seccomp_arch_native());
@@ -56,6 +57,8 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Usage %s: %s <program name> <arguments>\n", argv[0], argv[0]);
         return 1;
     }
+
+    // load seccomp filter and execute program in first argument will all other args passed top it
     seccomp_load(ctx);
     execvp(argv[1], argv + 1);
     return 1;

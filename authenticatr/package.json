@@ -1,6 +1,6 @@
 {
-  "name": "authenticatr",
-  "version": "0.0.1",
+  "name": "authenticatr-backend",
+  "version": "1.0.0",
   "description": "Authenticatr - Auth API for Submittr",
   "main": "src/index.js",
   "scripts": {

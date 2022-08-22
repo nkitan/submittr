@@ -211,6 +211,19 @@ class Job {
         }
     }
 
+    timeout(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    
+    async processEnded(pid) {
+        await timeout(10);
+        if(waitPID(pid) == 0){
+            return true
+        }
+
+        return false
+    }
+    
     async cleanupProcesses(){
         let processes = Promise.resolve([1]);
 
@@ -248,7 +261,9 @@ class Job {
                     logger.error('could not kill process: ' + err)
                 }
 
-                waitPID(proc.PID);
+                while(await processEnded(proc.PID) != true){
+                    // do nothing
+                }
             }
         }   
     }

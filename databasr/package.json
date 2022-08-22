@@ -1,6 +1,6 @@
 {
-  "name": "databasr",
-  "version": "0.0.1",
+  "name": "databasr-backend",
+  "version": "1.0.0",
   "description": "database api to serve assignments",
   "main": "src/index.js",
   "scripts": {

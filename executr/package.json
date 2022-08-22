@@ -1,6 +1,6 @@
 {
-  "name": "executr-api",
-  "version": "0.0.2",
+  "name": "executr-backend",
+  "version": "1.0.0",
   "description": "NodeJS Executr API",
   "main": "src/index.js",
   "scripts": {
@@ -27,6 +27,6 @@
     "path": "^0.12.7",
     "semver": "^7.3.5",
     "uuid": "^8.3.2",
-    "waitpid": "file:../node-waitpid"
+    "waitpid": "git+https://github.com/nkitan/js-waitpid"
   }
 }

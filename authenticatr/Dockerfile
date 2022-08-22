@@ -3,23 +3,23 @@ FROM node:slim
 ENV DEBIAN_FRONTEND=noninteractive
 LABEL author = "Ankit Das"
 
-ENV POSTGRES_PASSWORD='dbpassword'
-
-# SET UP POSTGRESQL
-RUN apt-get -y update
-RUN apt-get -y install postgresql
-
 # INSTALL REQUIREMENTS
-RUN mkdir /root/authenticatr/
-WORKDIR /root/authenticatr/
-COPY . /root/authenticatr/
-RUN npm install /root/authenticatr/
+RUN apt-get update -y && apt-get install -y python3 && rm -rf /var/lib/apt/lists/*
 
-#RUN bash scripts/startdb.sh
-#RUN bash scripts/initdb.sh
+# SET WORKDIR
+RUN mkdir /authenticatr
+WORKDIR /authenticatr/
+
+# INSTALL DEPENDENCIES
+COPY ["package.json", "/authenticatr/"]
+RUN npm install /authenticatr
+
+# COPY PROGRAM FILES
+COPY . /authenticatr/
 
 # EXPOSE API PORT
 EXPOSE 6969
 
 # START SERVER
-run npm start
+#CMD ["npm", "run", "start"]
+CMD ["node", "."]

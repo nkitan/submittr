@@ -16,4 +16,3 @@ install:
 clean:
 	$(RM) $(TARGET)
 	$(RM) $(INSTALL_PATH)$(TARGET) 
-

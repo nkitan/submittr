@@ -1,7 +1,9 @@
 version: "3.9"
 services:
   users:
-    image: nkitan/auth_database:v1
+    image: user_data:v1
+    build:
+      context: ./user_data/    
     environment:
       POSTGRES_PASSWORD: dbpassword
     networks:
@@ -9,42 +11,42 @@ services:
         ipv4_address: 169.169.1.2
     ports:
      - 5432:5432
-    volumes:
-     - /pgdata:/pgdata
   
   executr:
-   image: nkitan/executr:v2
-   command: "bash -c 'cd /root/executr && npm install && node .'"
+   image: executr:v1
+   build:
+      context: ./executr/
    networks:
      internal:
        ipv4_address: 169.169.1.3
    ports:
       - 6970:6970
    volumes:
-       - ~/projects/submittr/executr/:/root/executr/  
+       - ./executr/:/root/executr/  
 
-  authenticatr: 
-   image: nkitan/authenticatr:v2
-   command: "bash -c 'cd /root/authenticatr && npm install cookie-parser && node .'"
+  authenticatr:
+   image: authenticatr:v1
+   build:
+      context: ./authenticatr/
    networks:
      internal:
        ipv4_address: 169.169.1.4
    ports:
      - 6969:6969
    volumes:
-      - ~/projects/submittr/authenticatr/:/root/authenticatr/
+      - ./authenticatr/:/root/authenticatr/
 
   databasr:
-   image: nkitan/databasr:v2
-   command: bash -c "su postgres -c 'pg_ctl -D /pgdata start' && cd /root/databasr && npm install && node ."
+   image: databasr:v1
+   build:
+      context: ./databasr/
    networks:
       internal:
         ipv4_address: 169.169.1.5
    ports:
      - 6971:6971
    volumes:
-     - ~/projects/submittr/databasr/:/root/databasr/
-     - /databasrpg:/pgdata
+     - ./databasr/:/root/databasr/
 
 networks:
   internal:
