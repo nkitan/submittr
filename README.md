@@ -1,5 +1,5 @@
 # submittr
-a microservice based assignment management engine with cloud based code execution
+a monorepo for the microservice based assignment management engine with cloud based code execution system - submittr
 
 
 ## building submittr
